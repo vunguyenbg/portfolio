@@ -2,7 +2,7 @@
   Danh sách game concept hiển thị trên trang chủ.
   Thêm demo mới: copy thư mục _template thành thư mục mới (vd. "fish-flow"),
   rồi thêm một mục vào ĐẦU danh sách này. Mục đầu tiên (listed: true) được đưa lên
-  đầu trang chủ làm game nổi bật; các mục còn lại hiện trong phần "More concepts".
+  đầu trang chủ làm game nổi bật; tất cả các mục hiện trong phần "All game concepts".
 
   status: "pitching" (đang chào publisher) | "dev" (đang làm) | "paused" (tạm dừng)
   listed: false  -> ẩn khỏi trang chủ, nhưng link riêng vẫn mở được để gửi publisher

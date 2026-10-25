@@ -32,7 +32,7 @@ Demo sẽ không hiện trên trang chủ và không bị Google tìm thấy, nh
 
 ## Trang chủ
 
-Demo đầu tiên trong `assets/concepts.js` (có `listed: true`) tự được đưa lên đầu trang chủ làm game nổi bật, có video tự chạy và nút chơi thử. Các demo còn lại hiện trong mục "More game concepts".
+Demo đầu tiên trong `assets/concepts.js` (có `listed: true`) tự được đưa lên đầu trang chủ làm game nổi bật, có video tự chạy và nút chơi thử. Tất cả demo (kể cả demo nổi bật) hiện trong mục "All game concepts".
 
 ## Gửi publisher
 

@@ -24,7 +24,7 @@
     <a class="mark" href="#top"><img src="assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>
     <nav class="nav" aria-label="Sections">
       <a href="#featured">Featured</a>
-      <a href="#concepts" id="navConcepts" hidden>More concepts</a>
+      <a href="#concepts" id="navConcepts" hidden>All concepts</a>
       <a href="#about">About</a>
       <a href="#games">Games</a>
       <a href="#skills">Skills</a>
@@ -81,7 +81,7 @@
       <div class="sec-head">
         <div>
           <p class="eyebrow">Now building</p>
-          <h2>More game concepts</h2>
+          <h2>All game concepts</h2>
         </div>
         <p>Original hybrid-casual concepts with playable prototypes. Each one has its own page with gameplay video and pitch.</p>
       </div>
@@ -198,7 +198,7 @@
     Array.prototype.forEach.call(document.querySelectorAll('#featured .mail a, .actionbar a[href^="mailto"]'), function (a) { a.href = mail; });
     document.title = 'Vu Van Nguyen · ' + f.name;
   }
-  var more = list.slice(1);
+  var more = list;
   if (more.length) {
     document.getElementById('concepts').hidden = false;
     document.getElementById('navConcepts').hidden = false;
@@ -207,7 +207,7 @@
     return '<a class="concept" href="' + esc(c.slug) + '/">' +
       '<div class="concept-art"><img src="' + esc(c.poster) + '" alt="' + esc(c.name) + ' gameplay" loading="lazy"></div>' +
       '<div class="concept-body">' +
-        '<div class="chips"><span class="chip ' + esc(c.status) + '">' + esc(c.statusText) + '</span><span class="chip">' + esc(c.date) + '</span></div>' +
+        '<div class="chips"><span class="chip ' + esc(c.status) + '">' + esc(c.statusText) + '</span><span class="chip">' + esc(c.date) + '</span>' + (c === f ? '<span class="chip live">Featured</span>' : '') + '</div>' +
         '<h3>' + esc(c.name) + '</h3>' +
         '<p class="eyebrow">' + esc(c.genre) + '</p>' +
         '<p>' + esc(c.oneLine) + '</p>' +
