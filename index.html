@@ -18,12 +18,14 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="assets/site.css">
 </head>
-<body>
+<body class="has-actionbar">
 <header class="top">
   <div class="wrap">
     <a class="mark" href="#top"><img src="assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>
     <nav class="nav" aria-label="Sections">
-      <a href="#concepts">Concepts</a>
+      <a href="#featured">Featured</a>
+      <a href="#concepts" id="navConcepts" hidden>More concepts</a>
+      <a href="#about">About</a>
       <a href="#games">Games</a>
       <a href="#skills">Skills</a>
       <a href="#contact">Contact</a>
@@ -32,14 +34,36 @@
 </header>
 
 <main id="top">
-  <div class="hero">
+  <div class="cp-hero" id="featured">
+    <div class="wrap">
+      <div class="cp-head">
+        <p class="eyebrow" id="fEyebrow">Featured concept</p>
+        <h1 id="fName"></h1>
+        <p class="lead" id="fLine"></p>
+      </div>
+      <div class="phone" id="fMedia"></div>
+      <div class="cp-meta">
+        <div class="chips" id="fChips"></div>
+        <div class="cta">
+          <a class="btn btn-primary" id="fPlay" href="#">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M4 2.5 L13 8 L4 13.5 Z" fill="currentColor"></path></svg>
+            Play the prototype
+          </a>
+          <a class="btn btn-ghost" id="fPitch" href="#">View full pitch</a>
+        </div>
+        <p class="mail">Contact: <a href="mailto:vnkgame@gmail.com">vnkgame@gmail.com</a></p>
+        <a class="byline" href="#about"><img src="assets/avatar.jpg" alt="" width="28" height="28">By <b>Vu Van Nguyen</b> · Unity developer, 8+ years</a>
+      </div>
+    </div>
+  </div>
+
+  <section id="about" class="hero" style="padding-block: 40px 56px;">
     <div class="wrap">
       <div>
         <div class="me"><img class="avatar" src="assets/avatar.jpg" alt="Vu Van Nguyen" width="64" height="64"><div><p class="me-name">Vu Van Nguyen</p><p class="eyebrow">Independent Unity developer · Hanoi, Vietnam</p></div></div>
-        <h1>Puzzle games that read in <em>one second</em> and keep you tapping.</h1>
+        <h2 style="font-size: clamp(30px, 4.2vw, 48px); line-height: 1.05; font-weight: 800; margin-top: 14px;">Puzzle games that read in <em style="font-style: normal; color: var(--yellow);">one second</em> and keep you tapping.</h2>
         <p class="lead">8+ years building and shipping 2D and 3D mobile games in Unity. I now design and build my own hybrid-casual titles end to end, from playable prototype to store release.</p>
         <div class="cta">
-          <a class="btn btn-primary" href="#concepts">See my game concepts</a>
           <a class="btn btn-ghost" href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener">Download CV</a>
         </div>
       </div>
@@ -50,14 +74,14 @@
         <div class="num"><b>iOS · Android</b><span>through to store release</span></div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <section id="concepts">
+  <section id="concepts" hidden>
     <div class="wrap">
       <div class="sec-head">
         <div>
           <p class="eyebrow">Now building</p>
-          <h2>Game concepts</h2>
+          <h2>More game concepts</h2>
         </div>
         <p>Original hybrid-casual concepts with playable prototypes. Each one has its own page with gameplay video and pitch.</p>
       </div>
@@ -130,6 +154,7 @@
           </ul>
         </div>
         <div class="links">
+          <a href="mailto:vnkgame@gmail.com"><span>vnkgame@gmail.com</span><small>Email</small></a>
           <a href="https://www.linkedin.com/in/nguyenvv/" target="_blank" rel="noopener"><span>linkedin.com/in/nguyenvv</span><small>LinkedIn ↗</small></a>
           <a href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener"><span>Curriculum vitae</span><small>PDF ↗</small></a>
         </div>
@@ -137,6 +162,11 @@
     </div>
   </section>
 </main>
+
+<nav class="actionbar" aria-label="Quick actions">
+  <a class="btn btn-primary" id="barPlay" href="#featured">Play prototype</a>
+  <a class="btn btn-ghost" href="mailto:vnkgame@gmail.com">Email me</a>
+</nav>
 
 <footer>
   <div class="wrap">© 2026 Vu Van Nguyen · Hanoi, Vietnam</div>
@@ -148,9 +178,32 @@
   'use strict';
   function esc(t) { return String(t).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/"/g, '&quot;'); }
 
-  // ---------- Game concepts (from assets/concepts.js) ----------
+  // ---------- Featured concept + more concepts (from assets/concepts.js) ----------
   var list = (window.CONCEPTS || []).filter(function (c) { return c.listed !== false; });
-  document.getElementById('conceptsGrid').innerHTML = list.map(function (c) {
+  var f = list[0];
+  if (f) {
+    var base = f.slug + '/';
+    document.getElementById('fEyebrow').textContent = 'Featured concept · ' + f.genre;
+    document.getElementById('fName').textContent = f.name;
+    document.getElementById('fLine').textContent = f.oneLine;
+    document.getElementById('fChips').innerHTML = '<span class="chip ' + esc(f.status) + '">' + esc(f.statusText) + '</span><span class="chip">' + esc(f.date) + '</span>';
+    document.getElementById('fMedia').innerHTML = f.video
+      ? '<video poster="' + esc(f.poster) + '" autoplay muted loop playsinline preload="metadata" aria-label="' + esc(f.name) + ' gameplay"><source src="' + esc(f.video) + '.webm" type="video/webm"><source src="' + esc(f.video) + '.mp4" type="video/mp4"></video>'
+      : '<img src="' + esc(f.poster) + '" alt="' + esc(f.name) + ' gameplay">';
+    var play = document.getElementById('fPlay');
+    if (f.playable) { play.href = base + 'play/'; document.getElementById('barPlay').href = base + 'play/'; }
+    else { play.remove(); document.getElementById('barPlay').textContent = 'View pitch'; document.getElementById('barPlay').href = base; }
+    document.getElementById('fPitch').href = base;
+    var mail = 'mailto:vnkgame@gmail.com?subject=' + encodeURIComponent(f.name);
+    Array.prototype.forEach.call(document.querySelectorAll('#featured .mail a, .actionbar a[href^="mailto"]'), function (a) { a.href = mail; });
+    document.title = 'Vu Van Nguyen · ' + f.name;
+  }
+  var more = list.slice(1);
+  if (more.length) {
+    document.getElementById('concepts').hidden = false;
+    document.getElementById('navConcepts').hidden = false;
+  }
+  document.getElementById('conceptsGrid').innerHTML = more.map(function (c) {
     return '<a class="concept" href="' + esc(c.slug) + '/">' +
       '<div class="concept-art"><img src="' + esc(c.poster) + '" alt="' + esc(c.name) + ' gameplay" loading="lazy"></div>' +
       '<div class="concept-body">' +

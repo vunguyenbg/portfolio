@@ -30,6 +30,14 @@ _template/            Mẫu cho game concept mới (không hiện lên web)
 Đặt `listed: false` trong `assets/concepts.js` và bỏ comment dòng `noindex` trong trang của demo.
 Demo sẽ không hiện trên trang chủ và không bị Google tìm thấy, nhưng ai có link vẫn mở được.
 
+## Trang chủ
+
+Demo đầu tiên trong `assets/concepts.js` (có `listed: true`) tự được đưa lên đầu trang chủ làm game nổi bật, có video tự chạy và nút chơi thử. Các demo còn lại hiện trong mục "More game concepts".
+
+## Gửi publisher
+
+Luôn gửi link trang của game (ví dụ `.../portfolio/chain-slide/`), không gửi trang chủ.
+
 ## Đổi trạng thái demo
 
 Trong `assets/concepts.js`, sửa `status` và `statusText`:

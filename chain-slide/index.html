@@ -18,7 +18,7 @@
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
 <link rel="stylesheet" href="../assets/site.css">
 </head>
-<body>
+<body class="has-actionbar">
 <header class="top">
   <div class="wrap">
     <a class="mark" href="../"><img src="../assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>
@@ -33,11 +33,13 @@
 <main>
   <div class="cp-hero">
     <div class="wrap">
-      <div>
+      <div class="cp-head">
         <a class="back" href="../#concepts">← All concepts</a>
         <p class="eyebrow" style="margin-top: 18px;">Game concept · Hybrid-casual arrow puzzle</p>
         <h1>Chain Slide</h1>
         <p class="lead">Tap a block and it slides along its arrow, knocking every block in its path off the board.</p>
+      </div>
+      <div class="cp-meta">
         <div class="chips">
           <span class="chip pitching">Pitching to publishers</span>
           <span class="chip live">Playable prototype · 7 levels</span>
@@ -50,6 +52,7 @@
           </a>
           <a class="btn btn-ghost" href="media/gameplay.mp4" download>Download gameplay video</a>
         </div>
+        <p class="mail">Contact: <a href="mailto:vnkgame@gmail.com?subject=Chain%20Slide">vnkgame@gmail.com</a></p>
       </div>
       <div class="phone">
         <video poster="media/poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Chain Slide gameplay: a stuck block gets knocked free, then one tap clears six blocks">
@@ -129,6 +132,7 @@
           </div>
         </div>
         <div class="links">
+          <a href="mailto:vnkgame@gmail.com?subject=Chain%20Slide"><span>vnkgame@gmail.com</span><small>Email</small></a>
           <a href="../"><span>Full portfolio</span><small>Shipped games ↗</small></a>
           <a href="https://www.linkedin.com/in/nguyenvv/" target="_blank" rel="noopener"><span>linkedin.com/in/nguyenvv</span><small>LinkedIn ↗</small></a>
           <a href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener"><span>Curriculum vitae</span><small>PDF ↗</small></a>
@@ -137,6 +141,11 @@
     </div>
   </section>
 </main>
+
+<nav class="actionbar" aria-label="Quick actions">
+  <a class="btn btn-primary" href="play/">Play prototype</a>
+  <a class="btn btn-ghost" href="mailto:vnkgame@gmail.com?subject=Chain%20Slide">Email me</a>
+</nav>
 
 <footer>
   <div class="wrap">© 2026 Vu Van Nguyen · Chain Slide is an original concept.</div>
