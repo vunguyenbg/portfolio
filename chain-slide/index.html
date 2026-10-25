@@ -3,881 +3,205 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Playable prototype: tap a block to slide it along its arrow and knock every block in its path off the board.">
+<title>Chain Slide · Vu Van Nguyen</title>
+<meta name="description" content="Chain Slide: a hybrid-casual arrow puzzle where one tap knocks a whole row of blocks off the board. Gameplay video, playable prototype and pitch.">
 <meta name="theme-color" content="#0E1530">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect x=%273%27 y=%273%27 width=%2726%27 height=%2726%27 rx=%277%27 fill=%27%23FF4F86%27/%3E%3Cpath d=%27M9 16h11m-4-5 5 5-5 5%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
 <meta property="og:type" content="website">
 <meta property="og:title" content="Chain Slide">
-<meta property="og:description" content="Playable prototype: tap a block to slide it along its arrow and knock every block in its path off the board.">
+<meta property="og:description" content="One tap knocks a whole row off the board. Hybrid-casual arrow puzzle with a playable prototype.">
 <meta property="og:url" content="https://vunguyenbg.github.io/portfolio/chain-slide/">
-<meta property="og:image" content="https://vunguyenbg.github.io/portfolio/assets/og-chain-slide.jpg">
+<meta property="og:image" content="https://vunguyenbg.github.io/portfolio/chain-slide/media/og.jpg">
 <meta name="twitter:card" content="summary_large_image">
-<style>body{margin:0}[hidden]{display:none!important}</style>
-<title>Chain Slide</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@500;600;700&display=swap">
-<style>
-/* Layout: màn hình game dọc — HUD trên, sân khấu 3D giữa, nút dưới. Một bảng màu đêm băng tuyết, khối đồ chơi sáng màu. */
-:root {
-  --bg: #0D1830;
-  --panel: #16264A;
-  --panel-2: #20365F;
-  --ink: #F4F8FF;
-  --muted: #A9BCE0;
-  --card: #F3EEE2;
-  --card-ink: #1E2433;
-  --accent: #FF7A59;
-  --accent-deep: #C9502F;
-  --good: #3DDC97;
-  --font-display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
-  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
-  color-scheme: dark;
-}
-html, body { height: 100%; }
-body {
-  background: var(--bg);
-  color: var(--ink);
-  font-family: var(--font-body);
-  overflow: hidden;
-  -webkit-tap-highlight-color: transparent;
-  user-select: none;
-  -webkit-user-select: none;
-}
-.app {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  padding-block: 12px 14px;
-  padding-left: max(16px, env(safe-area-inset-left, 0px));
-  padding-right: max(16px, env(safe-area-inset-right, 0px));
-  box-sizing: border-box;
-  max-width: 720px;
-  margin: 0 auto;
-}
-.hud { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.level { display: flex; flex-direction: column; line-height: 1; }
-.level small { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
-.level b { font-family: var(--font-display); font-size: 28px; font-weight: 800; }
-.stats { display: flex; gap: 8px; }
-.stat {
-  display: flex; flex-direction: column; align-items: center; justify-content: center;
-  min-width: 74px; height: 52px; padding: 0 10px; box-sizing: border-box;
-  border-radius: 16px; background: var(--panel-2); line-height: 1;
-}
-.stat b { font-family: var(--font-display); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.stat small { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 3px; }
-.stat.taps { background: var(--card); color: var(--card-ink); }
-.stat.taps small { color: #6A5E45; }
-.stat.shake { animation: shake 0.4s; }
-@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
-.stage { position: relative; flex: 1; min-height: 0; border-radius: 22px; overflow: hidden; background: var(--panel); }
-.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
-.hint {
-  position: absolute; left: 12px; right: 12px; top: 10px; z-index: 2;
-  margin: 0 auto; max-width: 400px;
-  background: rgba(10, 20, 40, 0.84);
-  border: 1px solid rgba(169, 188, 224, 0.25);
-  border-radius: 12px; padding: 7px 12px;
-  font-size: 13px; font-weight: 600; line-height: 1.4;
-  color: var(--ink); text-align: center; text-wrap: balance;
-  pointer-events: none; transition: opacity 0.3s;
-}
-.combo {
-  position: absolute; left: 50%; top: 22%; z-index: 3;
-  transform: translate(-50%, -50%) scale(0.6);
-  font-family: var(--font-display); font-weight: 800; font-size: 44px;
-  color: #FFE070; text-shadow: 0 3px 0 #C25A1C, 0 6px 18px rgba(0,0,0,0.45);
-  pointer-events: none; opacity: 0; white-space: nowrap;
-}
-.combo.show { animation: combo 0.9s ease-out forwards; }
-@keyframes combo {
-  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
-  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
-  35% { transform: translate(-50%, -50%) scale(1); }
-  80% { opacity: 1; }
-  100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
-}
-.toast {
-  position: absolute; left: 50%; bottom: 12px; z-index: 2; transform: translateX(-50%);
-  background: var(--ink); color: var(--bg);
-  font-weight: 700; font-size: 14px;
-  border-radius: 999px; padding: 8px 14px;
-  white-space: nowrap; pointer-events: none;
-  opacity: 0; transition: opacity 0.25s;
-}
-.toast.show { opacity: 1; }
-.controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
-.tools { display: flex; gap: 8px; }
-.tool {
-  width: 56px; height: 56px; border-radius: 18px; border: none;
-  background: var(--panel-2); color: var(--ink);
-  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
-  cursor: pointer; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.28);
-  font-family: var(--font-body); font-size: 10px; font-weight: 700;
-}
-.tool:disabled { opacity: 0.4; cursor: default; }
-.tool.wide { width: auto; padding: 0 18px; flex-direction: row; gap: 8px; font-family: var(--font-display); font-size: 18px; font-weight: 800; background: #FFC93C; color: #3A2A00; box-shadow: inset 0 -4px 0 #C99512; }
-button:focus-visible { outline: 3px solid #FFC93C; outline-offset: 2px; }
-.modal {
-  position: fixed; inset: 0; z-index: 20;
-  display: flex; align-items: center; justify-content: center;
-  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
-  background: rgba(4, 10, 22, 0.62);
-}
-.modal[hidden] { display: none; }
-.card {
-  width: 100%; max-width: 340px;
-  background: var(--card); color: var(--card-ink);
-  border-radius: 26px; padding: 22px 20px 18px;
-  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
-  animation: pop 0.35s cubic-bezier(.2,1.4,.4,1);
-}
-@keyframes pop { from { transform: scale(0.8); opacity: 0 } to { transform: scale(1); opacity: 1 } }
-.card h2 { margin: 0; font-family: var(--font-display); font-size: 30px; font-weight: 800; line-height: 1.1; text-wrap: balance; }
-.card p { margin: 0; font-size: 15px; line-height: 1.45; color: #4F4736; text-wrap: balance; }
-.stars { display: flex; gap: 6px; }
-.stars svg { width: 38px; height: 38px; }
-.card .actions { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
-.card button { flex: 1; height: 50px; border: none; border-radius: 16px; font-family: var(--font-display); font-size: 18px; font-weight: 800; cursor: pointer; }
-.btn-main { background: var(--accent); color: #FFFFFF; box-shadow: inset 0 -4px 0 var(--accent-deep); }
-.btn-alt { background: #E2D9C4; color: var(--card-ink); }
-@media (prefers-reduced-motion: reduce) { .card, .stat.shake, .combo.show { animation: none; } .combo.show { opacity: 1; transform: translate(-50%, -50%); } }
-</style>
-
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
 </head>
 <body>
-<div class="app">
-  <header class="hud">
-    <div class="level">
-      <small>Level</small>
-      <b id="levelNum">1/7</b>
-    </div>
-    <div class="stats">
-      <div class="stat" aria-label="Blocks left">
-        <b id="left">3</b>
-        <small>blocks left</small>
-      </div>
-      <div class="stat taps" id="tapsBox" aria-label="Taps left">
-        <b id="taps">1</b>
-        <small>taps left</small>
-      </div>
-    </div>
-  </header>
-
-  <main class="stage" id="stage">
-    <canvas id="scene" aria-label="3D board: tap a block to slide it along its arrow and push the blocks ahead"></canvas>
-    <p class="hint" id="hint"></p>
-    <div class="combo" id="combo" aria-hidden="true"></div>
-    <div class="toast" id="toast" role="status" aria-live="polite"></div>
-  </main>
-
-  <footer class="controls">
-    <div class="tools">
-      <button class="tool" id="undoBtn" aria-label="Undo last tap">
-        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22"><path d="M8 5 L3 10 L8 15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.5 10 H13 A5 5 0 0 1 13 20 H10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
-        Undo
-      </button>
-      <button class="tool" id="resetBtn" aria-label="Restart level">
-        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 20 20"><path d="M4 10 A6 6 0 1 0 6 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path><path d="M3 2.5 V7 H7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
-        Restart
-      </button>
-    </div>
-    <button class="tool wide" id="hintBtn" aria-label="Show a hint">
-      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 A6 6 0 0 1 13.5 12.8 V15 H6.5 V12.8 A6 6 0 0 1 10 2 Z" fill="currentColor"></path><rect x="7" y="16.2" width="6" height="2" rx="1" fill="currentColor"></rect></svg>
-      Hint
-    </button>
-  </footer>
-</div>
-
-<div class="modal" id="modal" hidden>
-  <div class="card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
-    <div class="stars" id="stars"></div>
-    <h2 id="modalTitle"></h2>
-    <p id="modalText"></p>
-    <div class="actions" id="modalActions"></div>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../"><img src="../assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#how">How it plays</a>
+      <a href="#pitch">Pitch</a>
+      <a href="#contact">Contact</a>
+    </nav>
   </div>
-</div>
+</header>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<main>
+  <div class="cp-hero">
+    <div class="wrap">
+      <div>
+        <a class="back" href="../#concepts">← All concepts</a>
+        <p class="eyebrow" style="margin-top: 18px;">Game concept · Hybrid-casual arrow puzzle</p>
+        <h1>Chain Slide</h1>
+        <p class="lead">Tap a block and it slides along its arrow, knocking every block in its path off the board.</p>
+        <div class="chips">
+          <span class="chip pitching">Pitching to publishers</span>
+          <span class="chip live">Playable prototype · 7 levels</span>
+          <span class="chip">Unity build: 2–3 weeks</span>
+        </div>
+        <div class="cta">
+          <a class="btn btn-primary" href="play/">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M4 2.5 L13 8 L4 13.5 Z" fill="currentColor"></path></svg>
+            Play the prototype
+          </a>
+          <a class="btn btn-ghost" href="media/gameplay.mp4" download>Download gameplay video</a>
+        </div>
+      </div>
+      <div class="phone">
+        <video poster="media/poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Chain Slide gameplay: a stuck block gets knocked free, then one tap clears six blocks">
+          <source src="media/gameplay.webm" type="video/webm">
+          <source src="media/gameplay.mp4" type="video/mp4">
+        </video>
+      </div>
+    </div>
+  </div>
+
+  <section id="how">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">How it plays</p>
+          <h2>Blockers don't stop you. They fly.</h2>
+        </div>
+        <p>In Arrows, CubeAway and other arrow puzzles a blocked piece is a dead end. Chain Slide flips that rule.</p>
+      </div>
+      <div class="split">
+        <div class="toy" aria-label="Interactive demo of the Chain Slide mechanic">
+          <div class="toy-head">
+            <b>Try it</b>
+            <span class="eyebrow">Tap the pink block</span>
+          </div>
+          <div class="lane" id="lane">
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          </div>
+          <div class="toy-foot">
+            <span class="combo" id="combo" aria-live="polite"></span>
+            <button type="button" id="toyReset">Reset</button>
+          </div>
+        </div>
+        <div class="panel">
+          <ol class="steps">
+            <li><div><b>Tap a block</b><span>It slides in the direction of its arrow.</span></div></li>
+            <li><div><b>Push the whole row</b><span>Every block in its path gets knocked off the board. One good tap clears 3–5 blocks.</span></div></li>
+            <li><div><b>Free the stuck ones</b><span>A block facing a rock can't move. Another block has to knock it out.</span></div></li>
+            <li><div><b>Clear the board in limited taps</b><span>Players hunt for the tap that clears the most.</span></div></li>
+          </ol>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="pitch">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Pitch</p>
+          <h2>Why Chain Slide</h2>
+        </div>
+      </div>
+      <div class="panel">
+        <dl class="facts">
+          <div><dt>Market</dt><dd>Arrow puzzles are among 2026's fastest-growing hybrid-casual lines. Versions with boosters, lives and LiveOps (CubeAway, Maze Out) reached the top 200 grossing charts.</dd></div>
+          <div><dt>Hook</dt><dd>A familiar arrow read with a new rule: the blocker gets pushed out instead of stopping you. Combos and a clear "aha" when a stuck block is knocked free.</dd></div>
+          <div><dt>Ad creative</dt><dd>"1 tap, 6 blocks gone" reads in under two seconds. The stuck-block rescue makes a second hook.</dd></div>
+          <div><dt>Monetization</dt><dd>Extra taps on fail (IAP and rewarded ad), undo and hint boosters, lives, a toy-collection meta and a LiveOps calendar.</dd></div>
+          <div><dt>Status</dt><dd>Playable web prototype with 7 solver-verified levels. Next: a Unity build with 30–40 levels and final art in 2–3 weeks, ready for publisher SDK integration.</dd></div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="contact">
+        <div class="bio">
+          <img src="../assets/avatar.jpg" alt="Vu Van Nguyen" width="96" height="96">
+          <div>
+            <p class="eyebrow">Built by</p>
+            <h2 style="font-size: clamp(26px, 3.2vw, 34px);">Vu Van Nguyen</h2>
+            <p>Unity developer from Hanoi with 8+ years shipping mobile games, including the puzzle game Bus Sort: Color Parking Jam.</p>
+            <div class="stats-inline"><span><b>9</b>games worked on</span><span><b>150M+</b>Google Play installs</span></div>
+          </div>
+        </div>
+        <div class="links">
+          <a href="../"><span>Full portfolio</span><small>Shipped games ↗</small></a>
+          <a href="https://www.linkedin.com/in/nguyenvv/" target="_blank" rel="noopener"><span>linkedin.com/in/nguyenvv</span><small>LinkedIn ↗</small></a>
+          <a href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener"><span>Curriculum vitae</span><small>PDF ↗</small></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">© 2026 Vu Van Nguyen · Chain Slide is an original concept.</div>
+</footer>
+
 <script>
 (function () {
   'use strict';
-
-  // ---------- Màn chơi (đã kiểm tra bằng bộ giải: luôn có lời giải trong số lượt "par") ----------
-  // pieces: [hàng, cột, hướng]; hướng 0 lên, 1 phải, 2 xuống, 3 trái
-  var LEVELS = [{"rows":3,"cols":5,"rocks":[],"pieces":[[1,0,1],[1,2,0],[1,4,2]],"par":1,"solution":[[1,0]]},{"rows":4,"cols":4,"rocks":[[1,3]],"pieces":[[1,1,1],[3,1,0],[0,3,3]],"par":2,"solution":[[3,1],[0,3]]},{"rows":5,"cols":5,"rocks":[[4,0],[3,3]],"pieces":[[1,3,2],[0,0,2],[1,2,0],[3,4,2],[1,4,3],[1,0,3],[0,4,3]],"par":3,"solution":[[3,4],[1,4],[0,4]]},{"rows":5,"cols":5,"rocks":[[4,4],[3,1],[1,4]],"pieces":[[0,0,0],[1,0,1],[2,0,0],[2,2,3],[0,2,2],[3,4,3],[2,3,2],[3,3,0],[4,2,1]],"par":4,"solution":[[2,0],[3,4],[0,2],[2,3]]},{"rows":6,"cols":5,"rocks":[[0,4],[4,4],[5,3]],"pieces":[[3,0,1],[1,2,3],[1,4,0],[3,4,1],[1,0,1],[3,2,3],[3,3,3],[2,3,2],[1,3,3],[0,2,3],[4,2,1]],"par":5,"solution":[[1,0],[2,3],[3,0],[4,3],[0,2]]},{"rows":6,"cols":6,"rocks":[[0,5],[0,4],[3,4],[5,3]],"pieces":[[2,5,3],[4,0,1],[5,0,2],[5,4,0],[4,5,0],[2,0,3],[1,3,2],[3,0,2],[0,2,1],[2,4,0],[2,1,1],[3,2,0],[1,2,1]],"par":6,"solution":[[2,5],[5,4],[4,0],[3,0],[1,2],[3,2]]},{"rows":7,"cols":6,"rocks":[[2,5],[3,0],[0,4],[4,5]],"pieces":[[0,5,0],[6,2,3],[6,4,0],[3,3,0],[3,2,1],[2,1,1],[4,3,0],[2,3,2],[4,2,1],[5,2,0],[0,2,2],[5,5,2],[5,4,3],[2,0,1],[5,3,0]],"par":6,"solution":[[0,5],[5,5],[2,0],[2,4],[0,2],[5,3]]}];
-  var HINTS = [
-    'Tap the pink block. It slides right and knocks both blocks ahead off the board.',
-    'The pink block faces a rock and can\'t get out. Use another block to knock it free.',
-    'Taps are limited. Find the tap that clears the most blocks.'
-  ];
-  var DR = [-1, 0, 1, 0];
-  var DC = [0, 1, 0, -1];
-  var DIR_COLORS = [0xFFC21A, 0xFF4F86, 0x2ED389, 0x3D96FF];
-  var S = 1.0;
-  var SPEED = 10;          // ô mỗi giây
-  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-  function col(h) { return new THREE.Color(h).convertSRGBToLinear(); }
-
-  // ---------- Luật (giống hệt bộ giải) ----------
-  function applyMove(lv, rockSet, pieces, idx) {
-    var p = pieces[idx];
-    var occ = {};
-    pieces.forEach(function (q, i) { occ[q.r * 100 + q.c] = i; });
-    var d = p.d, r = p.r, c = p.c;
-    var train = [idx], rockHit = false;
-    while (true) {
-      r += DR[d]; c += DC[d];
-      if (r < 0 || r >= lv.rows || c < 0 || c >= lv.cols) break;
-      if (rockSet[r * 100 + c]) { rockHit = true; break; }
-      if (occ[r * 100 + c] !== undefined) train.push(occ[r * 100 + c]);
-    }
-    var next = pieces.map(function (q) { return { r: q.r, c: q.c, d: q.d, id: q.id }; });
-    var removed = {}, changed = false, finals = [];
-    if (!rockHit) {
-      train.forEach(function (i) { removed[i] = 1; finals.push(null); });
-      changed = true;
-    } else {
-      for (var k = train.length - 1, slot = 1; k >= 0; k--, slot++) {
-        var nr = r - DR[d] * slot, nc = c - DC[d] * slot;
-        var q = next[train[k]];
-        if (q.r !== nr || q.c !== nc) changed = true;
-        q.r = nr; q.c = nc;
-        finals[k] = { r: nr, c: nc };
-      }
-    }
-    if (!changed) return null;
-    return {
-      pieces: next.filter(function (_, i) { return !removed[i]; }),
-      train: train, rockHit: rockHit, finals: finals, d: d, rockR: r, rockC: c
-    };
-  }
-  function stateKey(pieces) {
-    return pieces.map(function (p) { return p.r + ',' + p.c + ',' + p.d; }).sort().join('|');
-  }
-  // Tìm nước đầu của một lời giải ngắn nhất (BFS), trong giới hạn lượt còn lại
-  function solveFirst(lv, rockSet, pieces, maxDepth) {
-    var frontier = [{ pieces: pieces, first: -1 }];
-    var seen = {}; seen[stateKey(pieces)] = 1;
-    for (var depth = 0; depth < maxDepth; depth++) {
-      var nf = [];
-      for (var s = 0; s < frontier.length; s++) {
-        var st = frontier[s];
-        for (var i = 0; i < st.pieces.length; i++) {
-          var res = applyMove(lv, rockSet, st.pieces, i);
-          if (!res) continue;
-          var first = st.first < 0 ? st.pieces[i].id : st.first;
-          if (!res.pieces.length) return first;
-          var k = stateKey(res.pieces);
-          if (seen[k]) continue;
-          seen[k] = 1;
-          nf.push({ pieces: res.pieces, first: first });
-        }
-      }
-      frontier = nf;
-      if (!frontier.length || frontier.length > 200000) break;
-    }
-    return null;
-  }
-
-  // ---------- DOM ----------
-  var $ = function (id) { return document.getElementById(id); };
-  var stageEl = $('stage'), canvas = $('scene');
-  var elLevel = $('levelNum'), elLeft = $('left'), elTaps = $('taps'), elTapsBox = $('tapsBox');
-  var elHint = $('hint'), elToast = $('toast'), elCombo = $('combo');
-  var undoBtn = $('undoBtn'), resetBtn = $('resetBtn'), hintBtn = $('hintBtn');
-  var modal = $('modal');
-
-  // ---------- Trạng thái ----------
-  var game = {
-    levelIdx: 0, lv: null, rockSet: {}, pieces: [], tapsLeft: 0, used: 0,
-    history: [], phase: 'ready', anim: null, hintId: null
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var lane = document.getElementById('lane');
+  var comboEl = document.getElementById('combo');
+  var PATHS = {
+    up: 'M12 3 L20 11 H15 V21 H9 V11 H4 Z',
+    right: 'M21 12 L13 20 V15 H3 V9 H13 V4 Z',
+    down: 'M12 21 L4 13 H9 V3 H15 V13 H20 Z'
   };
-  function save() { try { localStorage.setItem('truot-day-chuyen', JSON.stringify({ level: game.levelIdx })); } catch (e) {} }
-  function load() {
-    try {
-      var d = JSON.parse(localStorage.getItem('truot-day-chuyen') || 'null');
-      if (d && typeof d.level === 'number' && d.level >= 0 && d.level < LEVELS.length) game.levelIdx = d.level;
-    } catch (e) {}
+  var start = [
+    { col: 0, cls: 'p', dir: 'right', lead: true },
+    { col: 2, cls: 'y', dir: 'up' },
+    { col: 4, cls: 'b', dir: 'down' }
+  ];
+  var blocks = [], busy = false;
+  function geom() {
+    var w = lane.clientWidth - 20;
+    var cell = (w - 30) / 6;
+    return { cell: cell, step: cell + 6 };
   }
-
-  // ---------- Three.js ----------
-  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
-  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
-  renderer.outputEncoding = THREE.sRGBEncoding;
-  renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.05;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
-  var scene = new THREE.Scene();
-  var BG = col(0x101D38);
-  scene.background = BG;
-  scene.fog = new THREE.Fog(BG, 14, 30);
-  var camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
-
-  scene.add(new THREE.HemisphereLight(col(0xDDE8FF), col(0x22304F), 1.0));
-  var sun = new THREE.DirectionalLight(col(0xFFF4E0), 1.7);
-  sun.position.set(-3, 9, 5);
-  sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -7; sun.shadow.camera.right = 7;
-  sun.shadow.camera.top = 7; sun.shadow.camera.bottom = -7;
-  sun.shadow.camera.near = 1; sun.shadow.camera.far = 25;
-  sun.shadow.bias = -0.0005;
-  sun.shadow.normalBias = 0.03;
-  sun.shadow.radius = 4;
-  scene.add(sun);
-  var rim = new THREE.DirectionalLight(col(0x8FB6FF), 0.5);
-  rim.position.set(4, 3, -6);
-  scene.add(rim);
-
-  function canvasTex(w, h, draw) {
-    var cv = document.createElement('canvas');
-    cv.width = w; cv.height = h;
-    draw(cv.getContext('2d'), w, h);
-    var t = new THREE.CanvasTexture(cv);
-    t.encoding = THREE.sRGBEncoding;
-    t.anisotropy = 4;
-    return t;
-  }
-  function roundedRectShape(w, h, r) {
-    var s = new THREE.Shape(), x = -w / 2, y = -h / 2;
-    s.moveTo(x + r, y);
-    s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
-    s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-    s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
-    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
-    return s;
-  }
-  function roundedBox(w, d, h, r, bevel) {
-    var g = new THREE.ExtrudeGeometry(roundedRectShape(w - bevel * 2, d - bevel * 2, r), {
-      depth: h - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, curveSegments: 8
+  function build() {
+    blocks.forEach(function (b) { b.el.remove(); });
+    blocks = [];
+    var g = geom();
+    start.forEach(function (s) {
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'blk ' + s.cls;
+      el.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="' + PATHS[s.dir] + '" fill="#FFFFFF" stroke="rgba(20,26,42,0.85)" stroke-width="2" stroke-linejoin="round"></path></svg>';
+      el.style.width = g.cell + 'px';
+      el.style.height = g.cell + 'px';
+      el.style.left = (10 + s.col * g.step) + 'px';
+      el.setAttribute('aria-label', s.lead ? 'Pink block, arrow right. Tap to slide' : 'Block with arrow ' + s.dir);
+      el.addEventListener('click', s.lead ? play : function () { comboEl.textContent = 'Try the pink one'; });
+      lane.appendChild(el);
+      blocks.push({ el: el, col: s.col });
     });
-    g.rotateX(-Math.PI / 2);
-    g.translate(0, bevel, 0);
-    g.computeVertexNormals();
-    return g;
+    comboEl.textContent = '';
+    busy = false;
   }
-
-  // Vật liệu
-  var boardMat = new THREE.MeshStandardMaterial({ color: col(0x1F3A66), roughness: 0.6 });
-  var tileMat = new THREE.MeshStandardMaterial({ color: col(0x2C5490), roughness: 0.25, metalness: 0.05 });
-  var tileMat2 = new THREE.MeshStandardMaterial({ color: col(0x2A4F88), roughness: 0.25, metalness: 0.05 });
-  var rockMat = new THREE.MeshStandardMaterial({ color: col(0x6E7C92), roughness: 0.85, flatShading: true });
-  var snowMat = new THREE.MeshStandardMaterial({ color: col(0xF2F6FF), roughness: 0.7 });
-  var pieceMats = DIR_COLORS.map(function (c) { return new THREE.MeshStandardMaterial({ color: col(c), roughness: 0.32, metalness: 0.02, emissive: col(c), emissiveIntensity: 0.08 }); });
-  var whiteMat = new THREE.MeshStandardMaterial({ color: col(0xFFFFFF), roughness: 0.25 });
-  var blackMat = new THREE.MeshStandardMaterial({ color: col(0x141A2A), roughness: 0.2 });
-  var arrowTex = canvasTex(128, 128, function (ctx) {
-    ctx.beginPath();
-    ctx.moveTo(64, 10); ctx.lineTo(110, 58); ctx.lineTo(82, 58); ctx.lineTo(82, 116);
-    ctx.lineTo(46, 116); ctx.lineTo(46, 58); ctx.lineTo(18, 58); ctx.closePath();
-    ctx.lineJoin = 'round';
-    ctx.lineWidth = 10; ctx.strokeStyle = 'rgba(20,26,42,0.85)'; ctx.stroke();
-    ctx.fillStyle = '#FFFFFF'; ctx.fill();
-  });
-  var arrowMat = new THREE.MeshBasicMaterial({ map: arrowTex, transparent: true, depthWrite: false });
-  var ringTex = canvasTex(128, 128, function (ctx) {
-    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 10;
-    ctx.beginPath(); ctx.arc(64, 64, 52, 0, Math.PI * 2); ctx.stroke();
-  });
-  var hintRing = new THREE.Mesh(new THREE.PlaneGeometry(1.25, 1.25), new THREE.MeshBasicMaterial({ map: ringTex, color: col(0xFFE070), transparent: true, depthWrite: false }));
-  hintRing.rotation.x = -Math.PI / 2;
-  hintRing.visible = false;
-  hintRing.renderOrder = 3;
-  scene.add(hintRing);
-
-  var pieceGeo = roundedBox(0.84, 0.84, 0.5, 0.16, 0.07);
-  var boardGroup = new THREE.Group();
-  scene.add(boardGroup);
-  var fxGroup = new THREE.Group();
-  scene.add(fxGroup);
-
-  // Tuyết rơi nhẹ ở xa
-  var FLAKES = 90;
-  var flakeGeo = new THREE.BufferGeometry();
-  var flakePos = new Float32Array(FLAKES * 3);
-  for (var f = 0; f < FLAKES; f++) {
-    flakePos[f * 3] = (Math.random() - 0.5) * 16;
-    flakePos[f * 3 + 1] = Math.random() * 8 - 1;
-    flakePos[f * 3 + 2] = (Math.random() - 0.5) * 14;
-  }
-  flakeGeo.setAttribute('position', new THREE.BufferAttribute(flakePos, 3));
-  scene.add(new THREE.Points(flakeGeo, new THREE.PointsMaterial({ color: col(0xDCE7FF), size: 0.05, transparent: true, opacity: 0.6, depthWrite: false })));
-  var floor = new THREE.Mesh(new THREE.PlaneGeometry(60, 60), new THREE.MeshStandardMaterial({ color: col(0x16284A), roughness: 1 }));
-  floor.rotation.x = -Math.PI / 2;
-  floor.position.y = -1.2;
-  floor.receiveShadow = true;
-  scene.add(floor);
-
-  function cellX(c) { return (c - (game.lv.cols - 1) / 2) * S; }
-  function cellZ(r) { return (r - (game.lv.rows - 1) / 2) * S; }
-
-  function makePiece(p) {
-    var g = new THREE.Group();
-    var body = new THREE.Mesh(pieceGeo, pieceMats[p.d]);
-    body.castShadow = true; body.receiveShadow = true;
-    g.add(body);
-    var arrow = new THREE.Mesh(new THREE.PlaneGeometry(0.6, 0.6), arrowMat);
-    arrow.rotation.x = -Math.PI / 2;
-    arrow.rotation.z = -p.d * Math.PI / 2;
-    arrow.position.y = 0.505;
-    arrow.renderOrder = 2;
-    g.add(arrow);
-    [-1, 1].forEach(function (s) {
-      var eye = new THREE.Mesh(new THREE.SphereGeometry(0.075, 14, 10), whiteMat);
-      eye.position.set(s * 0.15, 0.27, 0.41);
-      eye.scale.z = 0.5;
-      var pupil = new THREE.Mesh(new THREE.SphereGeometry(0.042, 12, 8), blackMat);
-      pupil.position.set(s * 0.15, 0.26, 0.445);
-      g.add(eye, pupil);
+  function play() {
+    if (busy) return;
+    busy = true;
+    var g = geom(), per = reduce ? 0 : 120, t = 0;
+    blocks.forEach(function (b, i) {
+      var d = i === 0 ? 0 : (b.col - 1) * per;
+      setTimeout(function () {
+        b.el.style.transform = 'translateX(' + ((7 - b.col) * g.step) + 'px)';
+        b.el.classList.add('gone');
+      }, d);
+      t = Math.max(t, d);
     });
-    g.traverse(function (o) { o.userData.pieceId = p.id; });
-    return g;
+    setTimeout(function () { comboEl.textContent = 'Combo x3: 1 tap, 3 blocks'; }, t + 200);
+    setTimeout(build, t + 2200);
   }
-  function makeRock(r, c) {
-    var g = new THREE.Group();
-    var geo = new THREE.DodecahedronGeometry(0.38, 1);
-    var pos = geo.attributes.position, v = new THREE.Vector3();
-    for (var i = 0; i < pos.count; i++) {
-      v.fromBufferAttribute(pos, i);
-      var n = 1 + 0.12 * Math.sin(v.x * 9 + r) * Math.cos(v.z * 8 + c);
-      v.multiplyScalar(n);
-      if (v.y < -0.1) v.y = -0.1;
-      pos.setXYZ(i, v.x, v.y, v.z);
-    }
-    geo.computeVertexNormals();
-    var m = new THREE.Mesh(geo, rockMat);
-    m.scale.set(1.1, 0.95, 1.1);
-    m.position.y = 0.12;
-    m.castShadow = true; m.receiveShadow = true;
-    var cap = new THREE.Mesh(new THREE.SphereGeometry(0.26, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), snowMat);
-    cap.scale.set(1.2, 0.45, 1.1);
-    cap.position.y = 0.42;
-    g.add(m, cap);
-    g.position.set(cellX(c), 0, cellZ(r));
-    return g;
-  }
-
-  function buildBoard() {
-    while (boardGroup.children.length) boardGroup.remove(boardGroup.children[0]);
-    var lv = game.lv;
-    var w = lv.cols * S + 0.3, d = lv.rows * S + 0.3;
-    var base = new THREE.Mesh(roundedBox(w, d, 0.5, 0.25, 0.08), boardMat);
-    base.position.y = -0.56;
-    base.receiveShadow = true; base.castShadow = true;
-    boardGroup.add(base);
-    var tileGeo = roundedBox(0.92, 0.92, 0.06, 0.14, 0.02);
-    for (var r = 0; r < lv.rows; r++) {
-      for (var c = 0; c < lv.cols; c++) {
-        var t = new THREE.Mesh(tileGeo, (r + c) % 2 ? tileMat : tileMat2);
-        t.position.set(cellX(c), -0.06, cellZ(r));
-        t.receiveShadow = true;
-        t.castShadow = false;
-        boardGroup.add(t);
-      }
-    }
-    lv.rocks.forEach(function (rc) { boardGroup.add(makeRock(rc[0], rc[1])); });
-  }
-
-  // ---------- Dựng màn ----------
-  function buildLevel(fromHistory) {
-    var data = LEVELS[game.levelIdx];
-    game.lv = { rows: data.rows, cols: data.cols, rocks: data.rocks };
-    game.rockSet = {};
-    data.rocks.forEach(function (rc) { game.rockSet[rc[0] * 100 + rc[1]] = 1; });
-    game.par = data.par;
-    game.tapsLeft = data.par + (game.levelIdx < 2 ? 0 : 1);
-    game.used = 0;
-    game.history = [];
-    game.phase = 'ready';
-    game.anim = null;
-    game.falling = [];
-    clearHint();
-    buildBoard();
-    setPieces(data.pieces.map(function (p, i) { return { r: p[0], c: p[1], d: p[2], id: i }; }));
-    elHint.textContent = HINTS[game.levelIdx] || '';
-    elHint.style.opacity = HINTS[game.levelIdx] ? '1' : '0';
-    if (game.levelIdx === 0) showHintFor(0);
-    fitCamera();
-    updateHud();
-    save();
-  }
-  var meshes = {};
-  function setPieces(list) {
-    Object.keys(meshes).forEach(function (k) { fxGroup.remove(meshes[k]); });
-    meshes = {};
-    game.pieces = list.map(function (p) { return { r: p.r, c: p.c, d: p.d, id: p.id }; });
-    game.pieces.forEach(function (p) {
-      var m = makePiece(p);
-      m.position.set(cellX(p.c), 0, cellZ(p.r));
-      fxGroup.add(m);
-      meshes[p.id] = m;
-    });
-  }
-
-  // ---------- HUD ----------
-  function updateHud() {
-    elLevel.textContent = (game.levelIdx + 1) + '/' + LEVELS.length;
-    elLeft.textContent = String(game.pieces.length);
-    elTaps.textContent = String(game.tapsLeft);
-    undoBtn.disabled = !game.history.length || game.phase !== 'ready';
-    hintBtn.disabled = game.phase !== 'ready';
-  }
-  var toastTimer = 0;
-  function toast(msg) {
-    elToast.textContent = msg;
-    elToast.classList.add('show');
-    clearTimeout(toastTimer);
-    toastTimer = setTimeout(function () { elToast.classList.remove('show'); }, 1900);
-  }
-  function shakeTaps() {
-    elTapsBox.classList.remove('shake'); void elTapsBox.offsetWidth; elTapsBox.classList.add('shake');
-  }
-  function showCombo(n) {
-    elCombo.textContent = n >= 5 ? 'Amazing! x' + n : 'Combo x' + n;
-    elCombo.classList.remove('show'); void elCombo.offsetWidth; elCombo.classList.add('show');
-  }
-
-  // ---------- Camera ----------
-  var camBase = { dist: 10, el: 54 * Math.PI / 180 }, shake = 0;
-  function fitCamera() {
-    var w = stageEl.clientWidth || 1, h = stageEl.clientHeight || 1;
-    renderer.setSize(w, h, false);
-    camera.aspect = w / h;
-    var lv = game.lv;
-    var bw = lv.cols * S + 1.4, bd = lv.rows * S + 1.4;
-    var t = Math.tan(camera.fov * Math.PI / 360);
-    var needH = (bd * Math.sin(camBase.el) + 1.2) / (2 * t);
-    var needW = bw / (2 * t * camera.aspect);
-    camBase.dist = Math.max(needH, needW) * 1.02;
-    scene.fog.near = camBase.dist * 1.1;
-    scene.fog.far = camBase.dist * 2.6;
-    camera.updateProjectionMatrix();
-    placeCamera();
-  }
-  function placeCamera() {
-    var d = camBase.dist;
-    var sx = shake ? (Math.random() - 0.5) * shake * 0.12 : 0;
-    var sy = shake ? (Math.random() - 0.5) * shake * 0.08 : 0;
-    camera.position.set(sx, Math.sin(camBase.el) * d + sy, Math.cos(camBase.el) * d + 0.2);
-    camera.lookAt(sx, 0, 0.25);
-  }
-  new ResizeObserver(function () { if (game.lv) fitCamera(); }).observe(stageEl);
-
-  // ---------- Gợi ý ----------
-  function clearHint() { game.hintId = null; hintRing.visible = false; }
-  function showHintFor(id) {
-    var p = game.pieces.filter(function (q) { return q.id === id; })[0];
-    if (!p) return;
-    game.hintId = id;
-    hintRing.position.set(cellX(p.c), 0.03, cellZ(p.r));
-    hintRing.visible = true;
-  }
-  hintBtn.addEventListener('click', function () {
-    if (game.phase !== 'ready') return;
-    var id = solveFirst(game.lv, game.rockSet, game.pieces, Math.max(game.tapsLeft, 0));
-    if (id === null) {
-      toast(game.tapsLeft > 0 ? 'No winning line left. Undo or restart.' : 'Out of taps. Undo or restart.');
-      return;
-    }
-    showHintFor(id);
-  });
-
-  // ---------- Chạm ----------
-  var raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
-  canvas.addEventListener('pointerdown', function (e) {
-    if (game.phase !== 'ready') return;
-    var rect = canvas.getBoundingClientRect();
-    ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
-    ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
-    raycaster.setFromCamera(ndc, camera);
-    var hits = raycaster.intersectObjects(fxGroup.children, true);
-    for (var i = 0; i < hits.length; i++) {
-      var id = hits[i].object.userData.pieceId;
-      if (id !== undefined) { tapPiece(id); return; }
-    }
-  });
-
-  function tapPiece(id) {
-    var idx = -1;
-    game.pieces.forEach(function (p, i) { if (p.id === id) idx = i; });
-    if (idx < 0) return;
-    if (game.tapsLeft <= 0) { shakeTaps(); toast('Out of taps. Undo or restart.'); return; }
-    var res = applyMove(game.lv, game.rockSet, game.pieces, idx);
-    if (!res) {
-      nudge(id, game.pieces[idx].d);
-      toast('Blocked by a rock');
-      return;
-    }
-    elHint.style.opacity = '0';
-    clearHint();
-    game.history.push({ pieces: game.pieces.map(function (p) { return { r: p.r, c: p.c, d: p.d, id: p.id }; }), taps: game.tapsLeft });
-    game.tapsLeft -= 1;
-    game.used += 1;
-    startAnim(res);
-    updateHud();
-  }
-
-  // Lắc nhẹ khi không đi được
-  var nudges = [];
-  function nudge(id, d) { nudges.push({ id: id, d: d, t: 0 }); }
-
-  // ---------- Hoạt ảnh đẩy dây chuyền ----------
-  // Đoàn khối nằm trên một đường. Toạ độ dọc đường: s (ô). Khối đầu chạy, đẩy dần cả đoàn.
-  function startAnim(res) {
-    var d = res.d;
-    var lead = game.pieces[res.train[0]];
-    var items = res.train.map(function (i, k) {
-      var p = game.pieces[i];
-      var s = Math.abs((p.r - lead.r) * DR[d]) + Math.abs((p.c - lead.c) * DC[d]);
-      var fin;
-      if (res.rockHit) {
-        var f = res.finals[k];
-        fin = Math.abs((f.r - lead.r) * DR[d]) + Math.abs((f.c - lead.c) * DC[d]);
-      } else {
-        fin = Infinity;
-      }
-      return { id: p.id, s: s, fin: fin, x: s, started: k === 0, r0: p.r, c0: p.c };
-    });
-    // khoảng cách tới mép
-    var edge = 0, rr = lead.r, cc = lead.c;
-    while (rr >= 0 && rr < game.lv.rows && cc >= 0 && cc < game.lv.cols) { rr += DR[d]; cc += DC[d]; edge++; }
-    game.anim = { res: res, d: d, items: items, lead: { r: lead.r, c: lead.c }, t: 0, edge: edge, done: false, impacts: 0 };
-    game.phase = 'anim';
-    if (res.train.length >= 3) { showCombo(res.train.length); shake = Math.min(1, res.train.length * 0.18); }
-    updateHud();
-  }
-
-  function stepAnim(dt) {
-    var A = game.anim;
-    A.t += dt;
-    var lead = SPEED * A.t;
-    var items = A.items;
-    var allSettled = true;
-    for (var k = 0; k < items.length; k++) {
-      var it = items[k];
-      var want = k === 0 ? lead : Math.max(it.s, items[k - 1].x + 1);
-      var cap = it.fin;
-      var x = Math.min(cap, want);
-      if (!it.started && x > it.s + 0.001) {
-        it.started = true;
-        A.impacts++;
-        var m0 = meshes[it.id];
-        if (m0) { m0.userData.squash = 1; puff(m0.position); }
-      }
-      it.x = Math.max(it.s, x);
-      var m = meshes[it.id];
-      if (m) {
-        m.position.x = cellX(A.lead.c) + DC[A.d] * it.x * S;
-        m.position.z = cellZ(A.lead.r) + DR[A.d] * it.x * S;
-        if (!A.res.rockHit && it.x > A.edge - 0.5 && !it.falling) {
-          it.falling = true;
-          game.falling.push({ mesh: m, vy: 1.2, vx: DC[A.d] * SPEED * 0.6, vz: DR[A.d] * SPEED * 0.6, spin: (Math.random() - 0.5) * 8, life: 1.4 });
-          delete meshes[it.id];
-        }
-      }
-      if (A.res.rockHit) { if (it.x < it.fin - 0.001) allSettled = false; }
-      else if (!it.falling) allSettled = false;
-    }
-    if (allSettled) {
-      if (A.res.rockHit) {
-        items.forEach(function (it) { var m = meshes[it.id]; if (m) m.userData.squash = 0.7; });
-      }
-      game.pieces = A.res.pieces;
-      // đồng bộ vị trí chuẩn
-      game.pieces.forEach(function (p) { var m = meshes[p.id]; if (m) m.position.set(cellX(p.c), 0, cellZ(p.r)); });
-      game.anim = null;
-      game.phase = 'ready';
-      afterMove();
-    }
-  }
-
-  function afterMove() {
-    updateHud();
-    if (!game.pieces.length) {
-      game.phase = 'won';
-      setTimeout(function () { showModal('win'); }, 650);
-    } else if (game.tapsLeft <= 0) {
-      game.phase = 'lost';
-      setTimeout(function () { showModal('lose'); }, 500);
-    }
-    updateHud();
-  }
-
-  // ---------- Hiệu ứng ----------
-  var puffs = [];
-  var puffGeo = new THREE.SphereGeometry(0.06, 8, 6);
-  var puffMat = new THREE.MeshBasicMaterial({ color: col(0xE6EEFF), transparent: true });
-  function puff(pos) {
-    for (var i = 0; i < 8; i++) {
-      var m = new THREE.Mesh(puffGeo, puffMat.clone());
-      m.position.set(pos.x, 0.08, pos.z);
-      var a = Math.random() * Math.PI * 2;
-      m.userData.v = new THREE.Vector3(Math.cos(a) * 1.6, 1 + Math.random(), Math.sin(a) * 1.6);
-      m.userData.life = 0.5;
-      scene.add(m);
-      puffs.push(m);
-    }
-  }
-
-  // ---------- Hoàn tác / chơi lại ----------
-  undoBtn.addEventListener('click', function () {
-    if (game.phase !== 'ready' || !game.history.length) return;
-    var h = game.history.pop();
-    game.tapsLeft = h.taps;
-    game.used = Math.max(0, game.used - 1);
-    clearFalling();
-    setPieces(h.pieces);
-    clearHint();
-    updateHud();
-  });
-  resetBtn.addEventListener('click', function () { hideModal(); clearFalling(); buildLevel(); });
-  function clearFalling() {
-    (game.falling || []).forEach(function (f) { fxGroup.remove(f.mesh); });
-    game.falling = [];
-  }
-  document.addEventListener('keydown', function (e) {
-    if (!modal.hidden) return;
-    if (e.key === 'r' || e.key === 'R') { clearFalling(); buildLevel(); }
-    if (e.key === 'z' || e.key === 'Z') undoBtn.click();
-  });
-
-  // ---------- Bảng thắng / thua ----------
-  function starSvg(on) {
-    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 L14.9 8.6 L21.5 9.4 L16.6 13.9 L17.9 20.5 L12 17.2 L6.1 20.5 L7.4 13.9 L2.5 9.4 L9.1 8.6 Z" fill="' + (on ? '#FFB020' : '#D8CDB4') + '" stroke="' + (on ? '#B86F00' : '#B9AD93') + '" stroke-width="1.4" stroke-linejoin="round"></path></svg>';
-  }
-  function showModal(kind) {
-    var title = $('modalTitle'), text = $('modalText'), actions = $('modalActions'), stars = $('stars');
-    actions.innerHTML = '';
-    var last = game.levelIdx === LEVELS.length - 1;
-    if (kind === 'win') {
-      var n = game.used <= game.par ? 3 : 2;
-      stars.innerHTML = starSvg(true) + starSvg(true) + starSvg(n === 3);
-      stars.hidden = false;
-      title.textContent = last ? 'Prototype complete!' : 'Board cleared!';
-      text.textContent = 'You used ' + game.used + (game.used === 1 ? ' tap' : ' taps') + ' · best is ' + game.par + '.';
-      var next = document.createElement('button');
-      next.className = 'btn-main';
-      next.textContent = last ? 'Play again from level 1' : 'Next level';
-      next.addEventListener('click', function () {
-        hideModal();
-        game.levelIdx = last ? 0 : game.levelIdx + 1;
-        clearFalling();
-        buildLevel();
-      });
-      actions.appendChild(next);
-    } else {
-      stars.hidden = true;
-      title.textContent = 'Out of taps';
-      text.textContent = game.pieces.length + (game.pieces.length === 1 ? ' block' : ' blocks') + ' left. Look for a tap that pushes more blocks at once.';
-      var undo = document.createElement('button');
-      undo.className = 'btn-alt';
-      undo.textContent = 'Undo';
-      undo.addEventListener('click', function () { hideModal(); game.phase = 'ready'; undoBtn.click(); });
-      var retry = document.createElement('button');
-      retry.className = 'btn-main';
-      retry.textContent = 'Restart';
-      retry.addEventListener('click', function () { hideModal(); clearFalling(); buildLevel(); });
-      actions.appendChild(undo);
-      actions.appendChild(retry);
-    }
-    modal.hidden = false;
-    var btn = actions.querySelector('.btn-main');
-    if (btn) btn.focus();
-  }
-  function hideModal() { modal.hidden = true; }
-
-  // ---------- Vòng lặp ----------
-  var clock = new THREE.Clock(), tAll = 0;
-  function tick() {
-    var dt = Math.min(clock.getDelta(), 0.05);
-    tAll += dt;
-    if (game.anim) stepAnim(dt);
-
-    // khối rơi khỏi bàn
-    for (var i = game.falling.length - 1; i >= 0; i--) {
-      var fl = game.falling[i];
-      fl.vy -= 14 * dt;
-      fl.mesh.position.x += fl.vx * dt;
-      fl.mesh.position.z += fl.vz * dt;
-      fl.mesh.position.y += fl.vy * dt;
-      fl.mesh.rotation.x += fl.spin * dt * 0.6;
-      fl.mesh.rotation.z += fl.spin * dt;
-      fl.life -= dt;
-      if (fl.life <= 0) { fxGroup.remove(fl.mesh); game.falling.splice(i, 1); }
-    }
-
-    // nhún khi bị va, thở nhẹ khi đứng yên
-    Object.keys(meshes).forEach(function (k) {
-      var m = meshes[k];
-      var sq = m.userData.squash || 0;
-      if (sq > 0) m.userData.squash = Math.max(0, sq - dt * 4);
-      var s = reduceMotion ? 0 : Math.sin(sq * Math.PI) * 0.18;
-      var breathe = reduceMotion ? 0 : Math.sin(tAll * 2.2 + (+k) * 0.9) * 0.015;
-      m.scale.set(1 + s * 0.6, 1 - s + breathe, 1 + s * 0.6);
-    });
-
-    // lắc khi bị chặn
-    for (var n = nudges.length - 1; n >= 0; n--) {
-      var nd = nudges[n];
-      nd.t += dt;
-      var m2 = meshes[nd.id];
-      var p = game.pieces.filter(function (q) { return q.id === nd.id; })[0];
-      if (m2 && p) {
-        var off = Math.sin(nd.t * 30) * 0.08 * Math.max(0, 1 - nd.t / 0.35);
-        m2.position.x = cellX(p.c) + DC[nd.d] * off;
-        m2.position.z = cellZ(p.r) + DR[nd.d] * off;
-      }
-      if (nd.t > 0.35) nudges.splice(n, 1);
-    }
-
-    // bụi tuyết
-    for (var q = puffs.length - 1; q >= 0; q--) {
-      var pf = puffs[q];
-      pf.userData.life -= dt;
-      pf.userData.v.y -= 4 * dt;
-      pf.position.addScaledVector(pf.userData.v, dt);
-      pf.material.opacity = Math.max(0, pf.userData.life / 0.5);
-      if (pf.userData.life <= 0) { scene.remove(pf); puffs.splice(q, 1); }
-    }
-
-    if (hintRing.visible) {
-      var hs = 1 + Math.sin(tAll * 6) * 0.08;
-      hintRing.scale.set(hs, hs, hs);
-    }
-
-    if (!reduceMotion) {
-      var arr = flakeGeo.attributes.position.array;
-      for (var fi = 0; fi < FLAKES; fi++) {
-        arr[fi * 3 + 1] -= dt * (0.3 + (fi % 4) * 0.08);
-        arr[fi * 3] += Math.sin(tAll + fi) * dt * 0.08;
-        if (arr[fi * 3 + 1] < -1) arr[fi * 3 + 1] = 7;
-      }
-      flakeGeo.attributes.position.needsUpdate = true;
-    }
-
-    if (shake > 0) shake = Math.max(0, shake - dt * 2.5);
-    placeCamera();
-    renderer.render(scene, camera);
-    requestAnimationFrame(tick);
-  }
-
-  function start(data) {
-    load();
-    if (data && typeof data.level === 'number') game.levelIdx = Math.min(LEVELS.length - 1, Math.max(0, data.level));
-    buildLevel();
-    requestAnimationFrame(tick);
-  }
-  if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
-    window.claude.hot.snapshot(function () { return { level: game.levelIdx }; });
-  }
-  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
-  else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+  document.getElementById('toyReset').addEventListener('click', build);
+  new ResizeObserver(function () { if (!busy) build(); }).observe(lane);
 })();
 </script>
-
 </body>
 </html>
