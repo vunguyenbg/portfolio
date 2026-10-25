@@ -85,6 +85,10 @@ p { margin: 0; }
 .btn-primary { background: var(--yellow); color: #2A1E00; box-shadow: inset 0 -4px 0 #C99512; }
 .btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
 .btn-ghost:hover { border-color: var(--muted); }
+.me { display: flex; align-items: center; gap: 14px; margin-bottom: 8px; }
+.me-name { font-family: var(--font-display); font-weight: 800; font-size: 18px; line-height: 1.2; }
+.avatar { width: 64px; height: 64px; border-radius: 50%; object-fit: cover; border: 3px solid var(--yellow); flex: none; background: var(--surface-2); }
+.avatar.small { width: 44px; height: 44px; border-width: 2px; }
 .btn:focus-visible, a:focus-visible, button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
 
 /* Chain slide toy */
@@ -223,7 +227,7 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
   <div class="hero">
     <div class="wrap">
       <div>
-        <p class="eyebrow">Independent Unity developer · Hanoi, Vietnam</p>
+        <div class="me"><img class="avatar" src="assets/avatar.jpg" alt="Vu Van Nguyen" width="64" height="64"><div><p class="me-name">Vu Van Nguyen</p><p class="eyebrow">Independent Unity developer · Hanoi, Vietnam</p></div></div>
         <h1>Puzzle games that read in <em>one second</em> and keep you tapping.</h1>
         <p class="lead">8+ years building and shipping 2D and 3D mobile games in Unity. I now design and build my own hybrid-casual titles end to end, starting with Chain Slide.</p>
         <div class="cta">
@@ -351,7 +355,7 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
     <div class="wrap">
       <div class="contact">
         <div>
-          <p class="eyebrow">Publishing &amp; partnerships</p>
+          <div class="me"><img class="avatar small" src="assets/avatar.jpg" alt="" width="44" height="44" aria-hidden="true"><p class="eyebrow">Publishing &amp; partnerships</p></div>
           <h2>Looking for a publisher for Chain Slide.</h2>
           <p>What you get working with me:</p>
           <ul style="margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px;">
