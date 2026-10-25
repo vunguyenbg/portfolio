@@ -20,5 +20,18 @@ window.CONCEPTS = [
     video: 'chain-slide/media/gameplay',   // không có đuôi: trang tự dùng .webm và .mp4
     playable: true,
     listed: true
+  },
+  {
+    slug: 'current-flow',
+    name: 'Current Flow',
+    oneLine: 'Turn the water currents on a coral reef, then release whole schools of fish to their matching gates.',
+    genre: '3D hybrid-casual · Flow puzzle',
+    status: 'dev',
+    statusText: 'Early prototype',
+    date: 'Oct 2026',
+    poster: 'current-flow/media/poster.jpg',
+    video: 'current-flow/media/gameplay',
+    playable: true,
+    listed: true
   }
 ];
