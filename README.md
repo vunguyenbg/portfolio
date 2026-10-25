@@ -5,42 +5,32 @@ Trang: https://vunguyenbg.github.io/portfolio/
 ## Cấu trúc
 
 ```
-index.html            Trang chủ: giới thiệu, danh sách game concept, game đã làm, liên hệ
-assets/site.css       Giao diện dùng chung cho mọi trang
-assets/concepts.js    Danh sách game concept hiện trên trang chủ
+index.html            Trang chủ: giới thiệu, game đã làm, kỹ năng, liên hệ
+assets/site.css       Giao diện dùng chung
+assets/concepts.js    Game CÔNG KHAI hiện trên trang chủ (mặc định để trống)
 assets/avatar.jpg     Ảnh đại diện
 assets/games/         Ảnh các game đã làm
-chain-slide/          Một game concept
+p/<tên-game>-<mã>/    Trang riêng của từng game, chỉ ai có link mới xem được
   index.html          Trang pitch (link gửi publisher)
   play/index.html     Bản chơi thử
   media/              Video gameplay, ảnh bìa, ảnh chia sẻ
-_template/            Mẫu cho game concept mới (không hiện lên web)
+_template/            Mẫu cho game mới (không hiện lên web)
 ```
 
-## Thêm một demo mới (khoảng 10 phút)
+## Link riêng cho từng publisher
 
-1. Copy thư mục `_template` thành thư mục mới, tên viết thường không dấu, ví dụ `fish-flow`.
-2. Mở `fish-flow/index.html`, thay mọi chỗ trong ngoặc vuông `[...]` bằng nội dung thật, và thay `[slug]` bằng `fish-flow`.
-3. Bỏ video và ảnh vào `fish-flow/media/` (xem `media/README.txt`), bỏ bản chơi thử vào `fish-flow/play/`.
-4. Mở `assets/concepts.js`, thêm một mục vào **đầu** danh sách (demo mới nhất nằm trên cùng).
-5. Commit và push. Link gửi publisher: `https://vunguyenbg.github.io/portfolio/fish-flow/`
+- Trang chủ không liệt kê game đang chào hàng.
+- Mỗi game nằm ở `p/<tên-game>-<mã ngẫu nhiên>/`, có thẻ noindex nên Google không tìm thấy.
+- Gửi publisher nào thì chỉ gửi link game của bên đó.
+- Không ghi link game riêng vào file nào trong repo (README, concepts.js...), vì repo là công khai.
 
-## Demo chưa muốn công khai
+## Thêm một game mới
 
-Đặt `listed: false` trong `assets/concepts.js` và bỏ comment dòng `noindex` trong trang của demo.
-Demo sẽ không hiện trên trang chủ và không bị Google tìm thấy, nhưng ai có link vẫn mở được.
+1. Copy `_template` vào `p/`, đặt tên `ten-game-` cộng 6 ký tự ngẫu nhiên, ví dụ `p/fish-flow-k3m9xq`.
+2. Mở `index.html` trong thư mục đó, thay mọi chỗ trong ngoặc vuông `[...]`, thay `[slug]` bằng tên thư mục.
+3. Bỏ video và ảnh vào `media/`, bản chơi thử vào `play/`.
+4. Commit và push, rồi gửi link `https://vunguyenbg.github.io/portfolio/p/<tên-thư-mục>/`.
 
-## Trang chủ
+## Công khai một game
 
-Demo đầu tiên trong `assets/concepts.js` (có `listed: true`) tự được đưa lên đầu trang chủ làm game nổi bật, có video tự chạy và nút chơi thử. Tất cả demo (kể cả demo nổi bật) hiện trong mục "All game concepts".
-
-## Gửi publisher
-
-Luôn gửi link trang của game (ví dụ `.../portfolio/chain-slide/`), không gửi trang chủ.
-
-## Đổi trạng thái demo
-
-Trong `assets/concepts.js`, sửa `status` và `statusText`:
-- `pitching`: đang chào publisher
-- `dev`: đang làm
-- `paused`: tạm dừng
+Thêm game vào `assets/concepts.js` và xóa dòng `noindex` trong trang của game. Game đầu tiên trong danh sách sẽ lên đầu trang chủ.

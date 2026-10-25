@@ -1,37 +1,21 @@
 /*
-  Danh sách game concept hiển thị trên trang chủ.
-  Thêm demo mới: copy thư mục _template thành thư mục mới (vd. "fish-flow"),
-  rồi thêm một mục vào ĐẦU danh sách này. Mục đầu tiên (listed: true) được đưa lên
-  đầu trang chủ làm game nổi bật; tất cả các mục hiện trong phần "All game concepts".
+  Game concept CÔNG KHAI hiện trên trang chủ.
+  File này ai cũng đọc được, nên KHÔNG ghi game đang chào publisher (link riêng) vào đây.
+  Thêm một mục vào đầu danh sách khi muốn công khai một game; mục đầu tiên lên đầu trang chủ.
 
-  status: "pitching" (đang chào publisher) | "dev" (đang làm) | "paused" (tạm dừng)
-  listed: false  -> ẩn khỏi trang chủ, nhưng link riêng vẫn mở được để gửi publisher
-*/
-window.CONCEPTS = [
+  Mẫu:
   {
-    slug: 'chain-slide',
-    name: 'Chain Slide',
-    oneLine: 'Tap a block and it slides along its arrow, knocking every block in its path off the board.',
-    genre: 'Hybrid-casual · Arrow puzzle',
-    status: 'pitching',
+    slug: 'p/ten-game-abc123',
+    name: 'Tên game',
+    oneLine: 'Mô tả 1 câu.',
+    genre: 'Hybrid-casual · Puzzle',
+    status: 'pitching',            // pitching | dev | paused
     statusText: 'Pitching to publishers',
     date: 'Oct 2026',
-    poster: 'chain-slide/media/poster.jpg',
-    video: 'chain-slide/media/gameplay',   // không có đuôi: trang tự dùng .webm và .mp4
-    playable: true,
-    listed: true
-  },
-  {
-    slug: 'current-flow',
-    name: 'Current Flow',
-    oneLine: 'Turn the water currents on a coral reef, then release whole schools of fish to their matching gates.',
-    genre: '3D hybrid-casual · Flow puzzle',
-    status: 'dev',
-    statusText: 'Early prototype',
-    date: 'Oct 2026',
-    poster: 'current-flow/media/poster.jpg',
-    video: 'current-flow/media/gameplay',
+    poster: 'p/ten-game-abc123/media/poster.jpg',
+    video: 'p/ten-game-abc123/media/gameplay',
     playable: true,
     listed: true
   }
-];
+*/
+window.CONCEPTS = [];

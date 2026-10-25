@@ -11,8 +11,8 @@
 <meta property="og:title" content="Vu Van Nguyen">
 <meta property="og:description" content="Independent Unity developer building hybrid-casual puzzle games. Game concepts, playable prototypes and shipped titles.">
 <meta property="og:url" content="https://vunguyenbg.github.io/portfolio/">
-<meta property="og:image" content="https://vunguyenbg.github.io/portfolio/chain-slide/media/og.jpg">
-<meta name="twitter:card" content="summary_large_image">
+<meta property="og:image" content="https://vunguyenbg.github.io/portfolio/assets/avatar.jpg">
+<meta name="twitter:card" content="summary">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
@@ -23,7 +23,7 @@
   <div class="wrap">
     <a class="mark" href="#top"><img src="assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>
     <nav class="nav" aria-label="Sections">
-      <a href="#featured">Featured</a>
+      <a href="#featured" id="navFeatured">Featured</a>
       <a href="#concepts" id="navConcepts" hidden>All concepts</a>
       <a href="#about">About</a>
       <a href="#games">Games</a>
@@ -181,7 +181,11 @@
   // ---------- Featured concept + more concepts (from assets/concepts.js) ----------
   var list = (window.CONCEPTS || []).filter(function (c) { return c.listed !== false; });
   var f = list[0];
-  if (f) {
+  if (!f) {
+    document.getElementById('featured').hidden = true;
+    document.getElementById('navFeatured').hidden = true;
+    document.getElementById('barPlay').hidden = true;
+  } else {
     var base = f.slug + '/';
     document.getElementById('fEyebrow').textContent = 'Featured concept · ' + f.genre;
     document.getElementById('fName').textContent = f.name;
