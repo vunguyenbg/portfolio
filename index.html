@@ -158,6 +158,7 @@ section { padding-block: 56px; }
 .thumb { aspect-ratio: 16 / 9; position: relative; overflow: hidden; }
 .thumb svg { position: absolute; inset: 0; width: 100%; height: 100%; }
 .thumb .shot { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; display: block; }
+.thumb .shot.contain { object-fit: contain; background: #F4F6FF; }
 .thumb .icon { position: absolute; left: 12px; bottom: 12px; width: 52px; height: 52px; border-radius: 13px; border: 2px solid rgba(255,255,255,0.9); box-shadow: 0 6px 16px rgba(0,0,0,0.45); background: #13234F; object-fit: cover; }
 .thumb .icon.solo { left: 50%; top: 50%; bottom: auto; width: 96px; height: 96px; border-radius: 22px; transform: translate(-50%, -50%); }
 .game-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
@@ -380,7 +381,7 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
   // ---------- Games ----------
   var GAMES = [
     { name: 'Bus Sort: Color Parking Jam', tags: ['3D', 'Puzzle'], url: 'https://play.google.com/store/apps/details?id=com.bus.sort.color.car.parkingjam', store: 'Google Play', c: ['#FFC21A', '#FF4F86'], motif: 'grid', shot: 'https://play-lh.googleusercontent.com/GFiJRdaPst3WHYRWmbTMjKxEe66uRl8wbYwMmDZUF3z5Pm-7O3SaZZd9anyCSeyOQMUZWctTtKy5tvtmqcBDyA=w800-h450', icon: 'https://play-lh.googleusercontent.com/qQq2_k7-tuFrYxUuvCrZMQm08tPqpGSa4HQGv_SfvjSTC4h_7b1adg5N5tbJMr4qBNmvGXdRg_7_IC3O-VYPVg=w128-h128' },
-    { name: 'Merge Number', tags: ['2D', 'Puzzle', 'Merge'], url: 'https://apps.apple.com/us/app/merge-number-puzzle-game/id1548882354', store: 'App Store', c: ['#2ED389', '#3D96FF'], motif: 'merge', icon: 'https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/43/cd/73/43cd739f-6a38-25e0-d194-6e05c02ea911/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/256x256bb.jpg', shot: 'https://sites.google.com/sitesv-images-rt/AMxu72tymCsTK7OWExOKSNXQ_Pdy1NxShLjiMdxkHe5tIX6yQLNUF2Ut-dtUqf38E3jqGK1nCy09Gv5eC7EFMVjJIDEyjwftu_GtKT0QQ38Rbfp6iukNZUXXuBXGd0zKlsAjsvTYARcU_x7MglK3ARiLYrSlQNZJ7Z7BdybZ51iNDJyfYNkPdmx0--fLpF8mY_4pTXNhG-MsyJ4Bgzq3v1l2XyCbutmCJ3d-wUaUMKd1elQ=w1280' },
+    { name: 'Merge Number', tags: ['2D', 'Puzzle', 'Merge'], url: 'https://apps.apple.com/us/app/merge-number-puzzle-game/id1548882354', store: 'App Store', c: ['#2ED389', '#3D96FF'], motif: 'merge', shot: 'https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/43/cd/73/43cd739f-6a38-25e0-d194-6e05c02ea911/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/1200x630wa.jpg' },
     { name: '456 Run Challenge: Clash', tags: ['3D', 'Hyper-casual'], url: 'https://play.google.com/store/apps/details?id=com.run.squid.challenges.survival.clash', store: 'Google Play', c: ['#FF4F86', '#7A5CFF'], motif: 'run', shot: 'https://play-lh.googleusercontent.com/llFXZ0K3gb8p_TrE5rk6_mQvdPCA8-PUSdBT78KEFC8sLoJak0kZbVbt7hj0VE9lbdmh8_qprCmR-6_0lGYPVQ=w800-h450', icon: 'https://play-lh.googleusercontent.com/I1GdTYqfg_uZHOWAOIBs4iO656YCZv9_3Y9PioAS8RjiO6HlOzvibZ7BgEd-r8siQ0khq9eVxh2dUoNF9Xyg=w128-h128' },
     { name: 'Tower Defender', tags: ['2D', 'Defense'], url: 'https://play.google.com/store/apps/details?id=com.unimob.castle.defender.heroes', store: 'Google Play', c: ['#3D96FF', '#FFC21A'], motif: 'tower', shot: 'https://play-lh.googleusercontent.com/iel-MbGmeinXR27_2ZjQc5YyjrEWjx7hpwerBqRUK4S6hubSaGTdO4ugaXtQf4QwlG5Sm0iH9uidUw3q7XnZ=w800-h450', icon: 'https://play-lh.googleusercontent.com/5kIZ2VbSDoBVC-FbZcnN7f2pGbv2i3cWxRjvfsOiDWJndKzgVvQLhsf0zrcj_qpcJcWPruv4Ya0Y7HqLpiYU=w128-h128' },
     { name: 'CrazyBlock: Building & Adventure', tags: ['3D', 'Action'], url: 'https://play.google.com/store/apps/details?id=com.crazyblock.craft.adventure', store: 'Google Play', c: ['#2ED389', '#FFC21A'], motif: 'grid' },
@@ -419,7 +420,7 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
       ? '<a class="store" href="' + g.url + '" target="_blank" rel="noopener">View on ' + g.store + ' ↗</a>'
       : '<span class="store none">No public store page</span>';
     var media = '';
-    if (g.shot) media += '<img class="shot" src="' + g.shot + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">';
+    if (g.shot) media += '<img class="shot' + (/mzstatic/.test(g.shot) ? ' contain' : '') + '" src="' + g.shot + '" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">';
     if (g.icon) media += '<img class="icon' + (g.shot ? '' : ' solo') + '" src="' + g.icon + '" alt="' + g.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + ' icon" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">';
     return '<article class="game"><div class="thumb">' + thumb(g, i) + media + '</div><div class="game-body">' +
       '<h3>' + g.name.replace(/&/g, '&amp;') + '</h3>' +
