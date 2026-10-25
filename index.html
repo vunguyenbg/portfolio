@@ -169,6 +169,7 @@ section { padding-block: 56px; }
 .game h3 { font-size: 19px; font-weight: 800; line-height: 1.2; }
 .tags { display: flex; gap: 6px; flex-wrap: wrap; }
 .tag { font-family: var(--font-mono); font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+.tag.dl { background: rgba(255,194,26,0.16); color: var(--yellow); }
 .role { font-size: 14px; color: var(--muted); }
 .store { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 700; color: var(--blue); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
 .store:hover { text-decoration: underline; }
@@ -294,7 +295,7 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
       <div class="numbers">
         <div class="num"><b>8+</b><span>years with Unity</span></div>
         <div class="num"><b>9</b><span>mobile games worked on</span></div>
-        <div class="num"><b>2D · 3D</b><span>puzzle, action, sim, defense</span></div>
+        <div class="num"><b>150M+</b><span>Google Play installs on games I worked on</span></div>
         <div class="num"><b>iOS · Android</b><span>through to store release</span></div>
       </div>
     </div>
@@ -384,12 +385,12 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
 
   // ---------- Games ----------
   var GAMES = [
-    { name: 'Bus Sort: Color Parking Jam', tags: ['3D', 'Puzzle'], url: 'https://play.google.com/store/apps/details?id=com.bus.sort.color.car.parkingjam', store: 'Google Play', c: ['#FFC21A', '#FF4F86'], motif: 'grid', shot: 'https://play-lh.googleusercontent.com/GFiJRdaPst3WHYRWmbTMjKxEe66uRl8wbYwMmDZUF3z5Pm-7O3SaZZd9anyCSeyOQMUZWctTtKy5tvtmqcBDyA=w800-h450', icon: 'https://play-lh.googleusercontent.com/qQq2_k7-tuFrYxUuvCrZMQm08tPqpGSa4HQGv_SfvjSTC4h_7b1adg5N5tbJMr4qBNmvGXdRg_7_IC3O-VYPVg=w128-h128' },
+    { name: '456 Run Challenge: Clash', tags: ['3D', 'Hyper-casual'], url: 'https://play.google.com/store/apps/details?id=com.run.squid.challenges.survival.clash', store: 'Google Play', c: ['#FF4F86', '#7A5CFF'], motif: 'run', shot: 'https://play-lh.googleusercontent.com/llFXZ0K3gb8p_TrE5rk6_mQvdPCA8-PUSdBT78KEFC8sLoJak0kZbVbt7hj0VE9lbdmh8_qprCmR-6_0lGYPVQ=w800-h450', icon: 'https://play-lh.googleusercontent.com/I1GdTYqfg_uZHOWAOIBs4iO656YCZv9_3Y9PioAS8RjiO6HlOzvibZ7BgEd-r8siQ0khq9eVxh2dUoNF9Xyg=w128-h128', dl: '100M+' },
+    { name: 'Gangster City: Hero vs Monster', tags: ['3D', 'Action', 'Simulator'], url: 'https://play.google.com/store/apps/details?id=com.real.gangster.crime.city.vegas', store: 'Google Play', c: ['#7A5CFF', '#FF4F86'], motif: 'city', shot: 'https://play-lh.googleusercontent.com/C5zvkperVFT_KPFcsmHZDYXza76aloc3onoKfvxTyydgomoPeWz7JML6Gv-UT6HVRdwfXHJOfKcgd9uzz4NrocM=w800-h450', icon: 'https://play-lh.googleusercontent.com/DI0xRWaM7-tsShMssXofpX1MT5IN-9skcazzk779vE9ELcFvajAja8KsC24MD8CEyv5wsXhCs1q7uk803Df5og=w128-h128', dl: '50M+' },
+    { name: 'Bus Sort: Color Parking Jam', tags: ['3D', 'Puzzle'], url: 'https://play.google.com/store/apps/details?id=com.bus.sort.color.car.parkingjam', store: 'Google Play', c: ['#FFC21A', '#FF4F86'], motif: 'grid', shot: 'https://play-lh.googleusercontent.com/GFiJRdaPst3WHYRWmbTMjKxEe66uRl8wbYwMmDZUF3z5Pm-7O3SaZZd9anyCSeyOQMUZWctTtKy5tvtmqcBDyA=w800-h450', icon: 'https://play-lh.googleusercontent.com/qQq2_k7-tuFrYxUuvCrZMQm08tPqpGSa4HQGv_SfvjSTC4h_7b1adg5N5tbJMr4qBNmvGXdRg_7_IC3O-VYPVg=w128-h128', dl: '1M+' },
+    { name: 'Tower Defender', tags: ['2D', 'Defense'], url: 'https://play.google.com/store/apps/details?id=com.unimob.castle.defender.heroes', store: 'Google Play', c: ['#3D96FF', '#FFC21A'], motif: 'tower', shot: 'https://play-lh.googleusercontent.com/iel-MbGmeinXR27_2ZjQc5YyjrEWjx7hpwerBqRUK4S6hubSaGTdO4ugaXtQf4QwlG5Sm0iH9uidUw3q7XnZ=w800-h450', icon: 'https://play-lh.googleusercontent.com/5kIZ2VbSDoBVC-FbZcnN7f2pGbv2i3cWxRjvfsOiDWJndKzgVvQLhsf0zrcj_qpcJcWPruv4Ya0Y7HqLpiYU=w128-h128', dl: '1M+' },
     { name: 'Merge Number', tags: ['2D', 'Puzzle', 'Merge'], url: 'https://apps.apple.com/us/app/merge-number-puzzle-game/id1548882354', store: 'App Store', c: ['#2ED389', '#3D96FF'], motif: 'merge', shot: 'https://is1-ssl.mzstatic.com/image/thumb/Purple115/v4/43/cd/73/43cd739f-6a38-25e0-d194-6e05c02ea911/AppIcon-0-0-1x_U007emarketing-0-0-0-7-0-0-sRGB-0-0-0-GLES2_U002c0-512MB-85-220-0-0.png/1200x630wa.jpg' },
-    { name: '456 Run Challenge: Clash', tags: ['3D', 'Hyper-casual'], url: 'https://play.google.com/store/apps/details?id=com.run.squid.challenges.survival.clash', store: 'Google Play', c: ['#FF4F86', '#7A5CFF'], motif: 'run', shot: 'https://play-lh.googleusercontent.com/llFXZ0K3gb8p_TrE5rk6_mQvdPCA8-PUSdBT78KEFC8sLoJak0kZbVbt7hj0VE9lbdmh8_qprCmR-6_0lGYPVQ=w800-h450', icon: 'https://play-lh.googleusercontent.com/I1GdTYqfg_uZHOWAOIBs4iO656YCZv9_3Y9PioAS8RjiO6HlOzvibZ7BgEd-r8siQ0khq9eVxh2dUoNF9Xyg=w128-h128' },
-    { name: 'Tower Defender', tags: ['2D', 'Defense'], url: 'https://play.google.com/store/apps/details?id=com.unimob.castle.defender.heroes', store: 'Google Play', c: ['#3D96FF', '#FFC21A'], motif: 'tower', shot: 'https://play-lh.googleusercontent.com/iel-MbGmeinXR27_2ZjQc5YyjrEWjx7hpwerBqRUK4S6hubSaGTdO4ugaXtQf4QwlG5Sm0iH9uidUw3q7XnZ=w800-h450', icon: 'https://play-lh.googleusercontent.com/5kIZ2VbSDoBVC-FbZcnN7f2pGbv2i3cWxRjvfsOiDWJndKzgVvQLhsf0zrcj_qpcJcWPruv4Ya0Y7HqLpiYU=w128-h128' },
-    { name: 'CrazyBlock: Building & Adventure', tags: ['3D', 'Action'], url: 'https://play.google.com/store/apps/details?id=com.crazyblock.craft.adventure', store: 'Google Play', c: ['#2ED389', '#FFC21A'], motif: 'grid', shot: 'https://play-lh.googleusercontent.com/2BTPrs46d9sefQsESbe45OXGdfgGROEAZB21fPlI-OeaUsU9jsl33Su3FO-4yguFFtxQcjVknv0oTjPibhqf=w800-h450', icon: 'https://play-lh.googleusercontent.com/GbWyKDX_xeh-h-dlWtw69hrdwaeq3ZvuYOZQPBZr1JnNYbD3wOb1ZBkviMeYwLAKQ44LPRvEYx3QnwQkHMzG=w128-h128' },
-    { name: 'Gangster City: Hero vs Monster', tags: ['3D', 'Action', 'Simulator'], url: 'https://play.google.com/store/apps/details?id=com.real.gangster.crime.city.vegas', store: 'Google Play', c: ['#7A5CFF', '#FF4F86'], motif: 'city', shot: 'https://play-lh.googleusercontent.com/C5zvkperVFT_KPFcsmHZDYXza76aloc3onoKfvxTyydgomoPeWz7JML6Gv-UT6HVRdwfXHJOfKcgd9uzz4NrocM=w800-h450', icon: 'https://play-lh.googleusercontent.com/DI0xRWaM7-tsShMssXofpX1MT5IN-9skcazzk779vE9ELcFvajAja8KsC24MD8CEyv5wsXhCs1q7uk803Df5og=w128-h128' },
+    { name: 'CrazyBlock: Building & Adventure', tags: ['3D', 'Action'], url: 'https://play.google.com/store/apps/details?id=com.crazyblock.craft.adventure', store: 'Google Play', c: ['#2ED389', '#FFC21A'], motif: 'grid', shot: 'https://play-lh.googleusercontent.com/2BTPrs46d9sefQsESbe45OXGdfgGROEAZB21fPlI-OeaUsU9jsl33Su3FO-4yguFFtxQcjVknv0oTjPibhqf=w800-h450', icon: 'https://play-lh.googleusercontent.com/GbWyKDX_xeh-h-dlWtw69hrdwaeq3ZvuYOZQPBZr1JnNYbD3wOb1ZBkviMeYwLAKQ44LPRvEYx3QnwQkHMzG=w128-h128', dl: '5K+' },
     { name: 'Car Racing', tags: ['3D', 'Racing'], url: null, c: ['#3D96FF', '#FF4F86'], motif: 'run', shot: 'assets/games/car-racing.jpg' },
     { name: 'Superhero Sword', tags: ['2D', 'Action'], url: null, c: ['#FFC21A', '#7A5CFF'], motif: 'tower', shot: 'assets/games/superhero-sword.jpg' },
     { name: 'Dog Survivor', tags: ['2D', 'ECS'], url: null, c: ['#2ED389', '#FF4F86'], motif: 'merge', shot: 'assets/games/dog-survivor.jpg' }
@@ -428,7 +429,7 @@ footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
     if (g.icon) media += '<img class="icon' + (g.shot ? '' : ' solo') + '" src="' + g.icon + '" alt="' + g.name.replace(/&/g, '&amp;').replace(/"/g, '&quot;') + ' icon" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">';
     return '<article class="game"><div class="thumb">' + thumb(g, i) + media + '</div><div class="game-body">' +
       '<h3>' + g.name.replace(/&/g, '&amp;') + '</h3>' +
-      '<div class="tags">' + g.tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
+      '<div class="tags">' + (g.dl ? '<span class="tag dl">' + g.dl + ' downloads</span>' : '') + g.tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
       '<p class="role">Role: Unity developer</p>' + link + '</div></article>';
   }).join('');
 
