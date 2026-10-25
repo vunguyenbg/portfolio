@@ -1,0 +1,490 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vu Van Nguyen</title>
+<meta name="description" content="Independent Unity developer from Hanoi. Now building Chain Slide, a hybrid-casual arrow puzzle where one tap clears a whole row.">
+<meta name="theme-color" content="#0E1530">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 32 32%27%3E%3Crect x=%273%27 y=%273%27 width=%2726%27 height=%2726%27 rx=%277%27 fill=%27%23FF4F86%27/%3E%3Cpath d=%27M9 16h11m-4-5 5 5-5 5%27 stroke=%27white%27 stroke-width=%273%27 fill=%27none%27 stroke-linecap=%27round%27 stroke-linejoin=%27round%27/%3E%3C/svg%3E">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Vu Van Nguyen">
+<meta property="og:description" content="Independent Unity developer from Hanoi. Now building Chain Slide, a hybrid-casual arrow puzzle where one tap clears a whole row.">
+<meta property="og:url" content="https://vunguyenbg.github.io/portfolio/">
+<meta property="og:image" content="https://vunguyenbg.github.io/portfolio/assets/og-chain-slide.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one-column portfolio — hero with a playable chain-slide toy, featured project, games grid, skills, contact. Single deliberate dark look built from Chain Slide's block colours. */
+:root {
+  --bg: #0E1530;
+  --surface: #161F43;
+  --surface-2: #1E2A57;
+  --line: #2B3A70;
+  --ink: #F4F6FF;
+  --muted: #AAB4D8;
+  --yellow: #FFC21A;
+  --pink: #FF4F86;
+  --green: #2ED389;
+  --blue: #3D96FF;
+  --font-display: "Bricolage Grotesque", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Figtree", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, "SFMono-Regular", Menlo, monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.55;
+}
+a { color: inherit; }
+.wrap {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding-left: max(20px, env(safe-area-inset-left, 0px));
+  padding-right: max(20px, env(safe-area-inset-right, 0px));
+}
+h1, h2, h3 { font-family: var(--font-display); margin: 0; text-wrap: balance; letter-spacing: -0.01em; }
+p { margin: 0; }
+.eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+/* Top bar */
+.top { padding-block: 22px; }
+.top .wrap { display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.mark { display: flex; align-items: center; gap: 10px; font-family: var(--font-display); font-weight: 800; font-size: 18px; text-decoration: none; }
+.mark i { display: inline-block; width: 22px; height: 22px; border-radius: 7px; background: var(--pink); box-shadow: inset 0 -3px 0 rgba(0,0,0,0.25); }
+.nav { display: flex; gap: 20px; flex-wrap: wrap; font-size: 15px; font-weight: 600; }
+.nav a { text-decoration: none; color: var(--muted); }
+.nav a:hover { color: var(--ink); }
+
+/* Hero */
+.hero { padding-block: 40px 64px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero h1 { font-size: clamp(36px, 5.4vw, 60px); line-height: 1.03; font-weight: 800; margin-top: 14px; }
+.hero h1 em { font-style: normal; color: var(--yellow); }
+.hero .lead { margin-top: 18px; font-size: 18px; color: var(--muted); max-width: 52ch; }
+.cta { display: flex; gap: 12px; flex-wrap: wrap; margin-top: 28px; }
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  height: 50px; padding: 0 22px; border-radius: 14px;
+  font-weight: 700; font-size: 16px; text-decoration: none;
+  border: 0; cursor: pointer; font-family: var(--font-body);
+}
+.btn-primary { background: var(--yellow); color: #2A1E00; box-shadow: inset 0 -4px 0 #C99512; }
+.btn-ghost { background: transparent; color: var(--ink); border: 1.5px solid var(--line); }
+.btn-ghost:hover { border-color: var(--muted); }
+.btn:focus-visible, a:focus-visible, button:focus-visible { outline: 3px solid var(--yellow); outline-offset: 3px; }
+
+/* Chain slide toy */
+.toy {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  padding: 22px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+.toy-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.toy-head b { font-family: var(--font-display); font-size: 18px; }
+.lane {
+  position: relative;
+  display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 6px;
+  padding: 10px; border-radius: 18px; background: #12204A;
+  overflow: hidden;
+}
+.cell { aspect-ratio: 1; border-radius: 10px; background: #1C3166; }
+.blk {
+  position: absolute; top: 10px;
+  border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 -6px 0 rgba(0,0,0,0.22);
+  transition: transform 0.38s cubic-bezier(.3,.7,.3,1), opacity 0.3s;
+  cursor: pointer; border: 0; padding: 0;
+}
+.blk svg { width: 55%; height: 55%; }
+.blk.y { background: var(--yellow); }
+.blk.p { background: var(--pink); }
+.blk.b { background: var(--blue); }
+.blk.gone { opacity: 0; }
+.toy-foot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; font-size: 14px; color: var(--muted); }
+.toy-foot button { background: var(--surface-2); color: var(--ink); border: 0; border-radius: 10px; height: 38px; padding: 0 14px; font-weight: 700; font-family: var(--font-body); cursor: pointer; }
+.combo { font-family: var(--font-display); font-weight: 800; color: var(--yellow); font-size: 18px; min-height: 1.4em; }
+
+/* Section */
+section { padding-block: 56px; }
+.sec-head { display: flex; justify-content: space-between; align-items: end; gap: 16px; flex-wrap: wrap; margin-bottom: 28px; }
+.sec-head h2 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 800; line-height: 1.1; margin-top: 8px; }
+.sec-head p { color: var(--muted); max-width: 46ch; }
+
+/* Featured */
+.feature {
+  display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 0;
+  border-radius: 26px; overflow: hidden; border: 1px solid var(--line); background: var(--surface);
+}
+.feature-art { position: relative; display: flex; align-items: center; justify-content: center; padding: 28px; background: radial-gradient(120% 80% at 50% 30%, #1D3470 0%, #13234F 70%); }
+.feature-art video { display: block; height: 520px; max-height: 70vh; max-width: 100%; aspect-ratio: 9 / 16; border-radius: 26px; border: 6px solid #0B1126; box-shadow: 0 24px 60px rgba(0,0,0,0.45); background: #0B1126; object-fit: cover; }
+.feature-body { padding: 30px; display: flex; flex-direction: column; gap: 18px; }
+.chips { display: flex; gap: 8px; flex-wrap: wrap; }
+.chip { font-family: var(--font-mono); font-size: 12px; padding: 5px 10px; border-radius: 999px; background: var(--surface-2); color: var(--muted); }
+.chip.live { background: rgba(46,211,137,0.14); color: var(--green); }
+.feature h3 { font-size: 32px; font-weight: 800; }
+.feature .one { font-size: 18px; }
+.facts { display: grid; gap: 14px; margin: 0; }
+.facts div { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 12px; padding-top: 14px; border-top: 1px solid var(--line); }
+.facts dt { font-family: var(--font-mono); font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); padding-top: 3px; }
+.facts dd { margin: 0; font-size: 15px; }
+
+/* Numbers */
+.numbers { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; }
+.num { padding: 18px 20px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); }
+.num b { display: block; font-family: var(--font-display); font-size: clamp(24px, 2.6vw, 34px); white-space: nowrap; font-weight: 800; line-height: 1.1; font-variant-numeric: tabular-nums; }
+.num span { color: var(--muted); font-size: 14px; }
+
+/* Games */
+.note { font-size: 14px; color: var(--muted); border-left: 0; margin-bottom: 20px; }
+.games { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.game { border-radius: 20px; background: var(--surface); border: 1px solid var(--line); overflow: hidden; display: flex; flex-direction: column; }
+.thumb { aspect-ratio: 16 / 9; position: relative; overflow: hidden; }
+.thumb svg { position: absolute; inset: 0; width: 100%; height: 100%; }
+.game-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.game h3 { font-size: 19px; font-weight: 800; line-height: 1.2; }
+.tags { display: flex; gap: 6px; flex-wrap: wrap; }
+.tag { font-family: var(--font-mono); font-size: 11px; padding: 3px 8px; border-radius: 6px; background: var(--surface-2); color: var(--muted); }
+.role { font-size: 14px; color: var(--muted); }
+.store { margin-top: auto; padding-top: 6px; font-size: 14px; font-weight: 700; color: var(--blue); text-decoration: none; display: inline-flex; gap: 6px; align-items: center; }
+.store:hover { text-decoration: underline; }
+.store.none { color: var(--muted); font-weight: 500; }
+
+/* Skills */
+.skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.skill { padding: 22px; border-radius: 20px; background: var(--surface); border: 1px solid var(--line); }
+.skill h3 { font-size: 20px; font-weight: 800; display: flex; align-items: center; gap: 10px; }
+.skill h3 i { width: 14px; height: 14px; border-radius: 4px; display: inline-block; }
+.skill ul { margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 6px; color: var(--muted); }
+
+/* Contact */
+.contact { border-radius: 28px; padding: 40px; background: var(--surface); border: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); gap: 32px; align-items: center; }
+.contact h2 { font-size: clamp(28px, 3.6vw, 40px); font-weight: 800; line-height: 1.1; }
+.contact p { color: var(--muted); margin-top: 12px; }
+.links { display: grid; gap: 10px; }
+.links a, .links div { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 14px 16px; border-radius: 14px; background: var(--surface-2); text-decoration: none; font-weight: 600; }
+.links a:hover { background: #26346A; }
+.links small { font-family: var(--font-mono); font-size: 12px; color: var(--muted); font-weight: 500; }
+footer { padding-block: 32px 48px; color: var(--muted); font-size: 13px; }
+
+@media (max-width: 860px) {
+  .hero .wrap, .feature, .contact { grid-template-columns: minmax(0, 1fr); }
+  .feature-art video { height: 440px; }
+  .games, .skills { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .numbers { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 560px) {
+  .games, .skills { grid-template-columns: minmax(0, 1fr); }
+  .contact { padding: 26px; }
+  .feature-body { padding: 22px; }
+  .facts div { grid-template-columns: minmax(0, 1fr); gap: 4px; }
+  .hero { padding-block: 16px 40px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .blk { transition: none; }
+}
+</style>
+
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="#top"><i aria-hidden="true"></i>Vu Van Nguyen</a>
+    <nav class="nav" aria-label="Sections">
+      <a href="#chain-slide">Chain Slide</a>
+      <a href="#games">Games</a>
+      <a href="#skills">Skills</a>
+      <a href="#contact">Contact</a>
+    </nav>
+  </div>
+</header>
+
+<main id="top">
+  <div class="hero">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow">Independent Unity developer · Hanoi, Vietnam</p>
+        <h1>Puzzle games that read in <em>one second</em> and keep you tapping.</h1>
+        <p class="lead">8+ years building and shipping 2D and 3D mobile games in Unity. I now design and build my own hybrid-casual titles end to end, starting with Chain Slide.</p>
+        <div class="cta">
+          <a class="btn btn-primary" href="chain-slide/">
+            <svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M4 2.5 L13 8 L4 13.5 Z" fill="currentColor"></path></svg>
+            Play Chain Slide
+          </a>
+          <a class="btn btn-ghost" href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener">Download CV</a>
+        </div>
+      </div>
+
+      <div class="toy" aria-label="Interactive demo of the Chain Slide mechanic">
+        <div class="toy-head">
+          <b>How Chain Slide works</b>
+          <span class="eyebrow">Tap the pink block</span>
+        </div>
+        <div class="lane" id="lane">
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          <div class="cell"></div><div class="cell"></div><div class="cell"></div>
+        </div>
+        <div class="toy-foot">
+          <span class="combo" id="combo" aria-live="polite"></span>
+          <button type="button" id="toyReset">Reset</button>
+        </div>
+        <p style="font-size: 14px; color: var(--muted);">In other arrow puzzles a blocked piece is a dead end. Here the blocker gets knocked off the board, so one good tap clears a whole row.</p>
+      </div>
+    </div>
+  </div>
+
+  <section id="chain-slide">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">New concept · 2026</p>
+          <h2>Chain Slide</h2>
+        </div>
+        <p>A hybrid-casual arrow puzzle built around one twist: blockers don't stop you, they fly.</p>
+      </div>
+
+      <article class="feature">
+        <div class="feature-art"><video poster="assets/chain-slide-poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="Chain Slide gameplay: one tap knocks a whole row of blocks off the board"><source src="assets/chain-slide-15s.webm" type="video/webm"><source src="assets/chain-slide-15s.mp4" type="video/mp4"></video></div>
+        <div class="feature-body">
+          <div class="chips">
+            <span class="chip live">Playable prototype · 7 levels</span>
+            <span class="chip">Unity build in progress</span>
+          </div>
+          <p class="one">Tap a block and it slides along its arrow, knocking every block in its path off the board.</p>
+          <dl class="facts">
+            <div><dt>Goal</dt><dd>Clear the board within a limited number of taps. Rocks stop a chain, so players plan which tap clears the most.</dd></div>
+            <div><dt>Hook</dt><dd>A block stuck against a rock can't move on its own. Another block has to knock it free.</dd></div>
+            <div><dt>Monetization</dt><dd>Extra taps on fail (IAP and rewarded ad), undo and hint boosters, lives, a toy-collection meta and a LiveOps calendar.</dd></div>
+            <div><dt>Market</dt><dd>Arrow puzzles are among 2026's fastest-growing hybrid-casual lines (Arrows, CubeAway, Maze Out).</dd></div>
+          </dl>
+          <div class="cta" style="margin-top: 4px;">
+            <a class="btn btn-primary" href="chain-slide/">Play the prototype</a>
+          </div>
+        </div>
+      </article>
+    </div>
+  </section>
+
+  <section aria-label="Experience in numbers" style="padding-block: 8px 40px;">
+    <div class="wrap">
+      <div class="numbers">
+        <div class="num"><b>8+</b><span>years with Unity</span></div>
+        <div class="num"><b>9</b><span>mobile games worked on</span></div>
+        <div class="num"><b>2D · 3D</b><span>puzzle, action, sim, defense</span></div>
+        <div class="num"><b>iOS · Android</b><span>through to store release</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section id="games">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">Experience</p>
+          <h2>Games I've worked on</h2>
+        </div>
+        <p>Built as a Unity developer at other studios. Each title belongs to its publisher.</p>
+      </div>
+      <div class="games" id="gamesGrid"></div>
+    </div>
+  </section>
+
+  <section id="skills">
+    <div class="wrap">
+      <div class="sec-head">
+        <div>
+          <p class="eyebrow">What I handle</p>
+          <h2>From first prototype to store release</h2>
+        </div>
+      </div>
+      <div class="skills">
+        <div class="skill">
+          <h3><i style="background: var(--pink);" aria-hidden="true"></i>Gameplay &amp; systems</h3>
+          <ul>
+            <li>Unity / C#</li>
+            <li>Gameplay systems</li>
+            <li>UI systems</li>
+            <li>Unity DOTS / ECS</li>
+            <li>Git</li>
+          </ul>
+        </div>
+        <div class="skill">
+          <h3><i style="background: var(--blue);" aria-hidden="true"></i>Performance</h3>
+          <ul>
+            <li>Performance optimization</li>
+            <li>Mobile game development</li>
+          </ul>
+        </div>
+        <div class="skill">
+          <h3><i style="background: var(--green);" aria-hidden="true"></i>Live game</h3>
+          <ul>
+            <li>Analytics</li>
+            <li>Monetization</li>
+            <li>Android / iOS release</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="contact">
+    <div class="wrap">
+      <div class="contact">
+        <div>
+          <p class="eyebrow">Publishing &amp; partnerships</p>
+          <h2>Looking for a publisher for Chain Slide.</h2>
+          <p>What you get working with me:</p>
+          <ul style="margin: 12px 0 0; padding: 0; list-style: none; display: grid; gap: 8px;">
+            <li style="display: flex; gap: 10px;"><i aria-hidden="true" style="flex: none; width: 10px; height: 10px; margin-top: 8px; border-radius: 3px; background: var(--yellow);"></i><span>A Unity build of Chain Slide with 30–40 levels in 2–3 weeks</span></li>
+            <li style="display: flex; gap: 10px;"><i aria-hidden="true" style="flex: none; width: 10px; height: 10px; margin-top: 8px; border-radius: 3px; background: var(--pink);"></i><span>Your SDK and analytics events integrated</span></li>
+            <li style="display: flex; gap: 10px;"><i aria-hidden="true" style="flex: none; width: 10px; height: 10px; margin-top: 8px; border-radius: 3px; background: var(--green);"></i><span>Quick iterations on creatives, CPI and retention tests</span></li>
+          </ul>
+        </div>
+        <div class="links">
+          <a href="https://www.linkedin.com/in/nguyenvv/" target="_blank" rel="noopener"><span>linkedin.com/in/nguyenvv</span><small>LinkedIn ↗</small></a>
+          <a href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener"><span>Curriculum vitae</span><small>PDF ↗</small></a>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">© 2026 Vu Van Nguyen · Hanoi, Vietnam</div>
+</footer>
+
+<script>
+(function () {
+  'use strict';
+  var reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  // ---------- Games ----------
+  var GAMES = [
+    { name: 'Bus Sort: Color Parking Jam', tags: ['3D', 'Puzzle'], url: 'https://play.google.com/store/apps/details?id=com.bus.sort.color.car.parkingjam', store: 'Google Play', c: ['#FFC21A', '#FF4F86'], motif: 'grid' },
+    { name: 'Merge Number', tags: ['2D', 'Puzzle', 'Merge'], url: 'https://apps.apple.com/us/app/merge-number-puzzle-game/id1548882354', store: 'App Store', c: ['#2ED389', '#3D96FF'], motif: 'merge' },
+    { name: '456 Run Challenge: Clash', tags: ['3D', 'Hyper-casual'], url: 'https://play.google.com/store/apps/details?id=com.run.squid.challenges.survival.clash', store: 'Google Play', c: ['#FF4F86', '#7A5CFF'], motif: 'run' },
+    { name: 'Tower Defender', tags: ['2D', 'Defense'], url: 'https://play.google.com/store/apps/details?id=com.unimob.castle.defender.heroes', store: 'Google Play', c: ['#3D96FF', '#FFC21A'], motif: 'tower' },
+    { name: 'CrazyBlock: Building & Adventure', tags: ['3D', 'Action'], url: 'https://play.google.com/store/apps/details?id=com.crazyblock.craft.adventure', store: 'Google Play', c: ['#2ED389', '#FFC21A'], motif: 'grid' },
+    { name: 'Gangster City: Hero vs Monster', tags: ['3D', 'Action', 'Simulator'], url: 'https://play.google.com/store/apps/details?id=com.real.gangster.crime.city.vegas', store: 'Google Play', c: ['#7A5CFF', '#FF4F86'], motif: 'city' },
+    { name: 'Car Racing', tags: ['3D', 'Racing'], url: null, c: ['#3D96FF', '#FF4F86'], motif: 'run' },
+    { name: 'Superhero Sword', tags: ['2D', 'Action'], url: null, c: ['#FFC21A', '#7A5CFF'], motif: 'tower' },
+    { name: 'Dog Survivor', tags: ['2D', 'ECS'], url: null, c: ['#2ED389', '#FF4F86'], motif: 'merge' }
+  ];
+  function thumb(g, i) {
+    var a = g.c[0], b = g.c[1], s = '';
+    s += '<rect width="320" height="180" fill="#13234F"></rect>';
+    if (g.motif === 'grid') {
+      for (var r = 0; r < 3; r++) for (var c = 0; c < 6; c++) {
+        var on = (r * 7 + c * 3 + i) % 4;
+        s += '<rect x="' + (52 + c * 38) + '" y="' + (34 + r * 38) + '" width="32" height="32" rx="8" fill="' + (on === 0 ? a : on === 1 ? b : '#1E3A78') + '"></rect>';
+      }
+    } else if (g.motif === 'merge') {
+      s += '<rect x="70" y="56" width="68" height="68" rx="16" fill="' + a + '"></rect><rect x="182" y="56" width="68" height="68" rx="16" fill="' + a + '"></rect>';
+      s += '<path d="M146 90 H174" stroke="#F4F6FF" stroke-width="6" stroke-linecap="round"></path><path d="M164 80 L176 90 L164 100" fill="none" stroke="#F4F6FF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"></path>';
+      s += '<rect x="126" y="132" width="68" height="20" rx="8" fill="' + b + '" opacity="0.8"></rect>';
+    } else if (g.motif === 'run') {
+      s += '<path d="M0 150 L320 112 L320 180 L0 180 Z" fill="#1E3A78"></path>';
+      for (var k = 0; k < 4; k++) s += '<rect x="' + (60 + k * 54) + '" y="' + (118 - k * 7) + '" width="34" height="14" rx="5" fill="' + (k % 2 ? b : a) + '"></rect>';
+      s += '<circle cx="250" cy="64" r="20" fill="' + a + '"></circle>';
+    } else if (g.motif === 'tower') {
+      s += '<rect x="132" y="48" width="56" height="104" rx="10" fill="' + a + '"></rect><rect x="122" y="36" width="76" height="20" rx="6" fill="' + b + '"></rect>';
+      s += '<rect x="56" y="118" width="40" height="34" rx="8" fill="#1E3A78"></rect><rect x="224" y="108" width="40" height="44" rx="8" fill="#1E3A78"></rect>';
+    } else {
+      for (var t = 0; t < 7; t++) { var h = 40 + ((t * 37 + i * 13) % 70); s += '<rect x="' + (34 + t * 38) + '" y="' + (150 - h) + '" width="30" height="' + h + '" rx="5" fill="' + (t % 3 === 0 ? a : t % 3 === 1 ? '#1E3A78' : b) + '"></rect>'; }
+    }
+    return '<svg viewBox="0 0 320 180" preserveAspectRatio="xMidYMid slice" aria-hidden="true">' + s + '</svg>';
+  }
+  var grid = document.getElementById('gamesGrid');
+  grid.innerHTML = GAMES.map(function (g, i) {
+    var link = g.url
+      ? '<a class="store" href="' + g.url + '" target="_blank" rel="noopener">View on ' + g.store + ' ↗</a>'
+      : '<span class="store none">No public store page</span>';
+    return '<article class="game"><div class="thumb">' + thumb(g, i) + '</div><div class="game-body">' +
+      '<h3>' + g.name.replace(/&/g, '&amp;') + '</h3>' +
+      '<div class="tags">' + g.tags.map(function (t) { return '<span class="tag">' + t + '</span>'; }).join('') + '</div>' +
+      '<p class="role">Role: Unity developer</p>' + link + '</div></article>';
+  }).join('');
+
+  // ---------- Hero toy: one tap knocks a row off the board ----------
+  var lane = document.getElementById('lane');
+  var comboEl = document.getElementById('combo');
+  var ARROW = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="REPLACE" fill="#FFFFFF" stroke="rgba(20,26,42,0.85)" stroke-width="2" stroke-linejoin="round"></path></svg>';
+  var PATHS = {
+    up: 'M12 3 L20 11 H15 V21 H9 V11 H4 Z',
+    right: 'M21 12 L13 20 V15 H3 V9 H13 V4 Z',
+    down: 'M12 21 L4 13 H9 V3 H15 V13 H20 Z'
+  };
+  var start = [
+    { col: 0, cls: 'p', dir: 'right', lead: true },
+    { col: 2, cls: 'y', dir: 'up' },
+    { col: 4, cls: 'b', dir: 'down' }
+  ];
+  var blocks = [], busy = false;
+  function geom() {
+    var w = lane.clientWidth - 20, gap = 6;
+    var cell = (w - gap * 5) / 6;
+    return { cell: cell, step: cell + gap };
+  }
+  function build() {
+    blocks.forEach(function (b) { b.el.remove(); });
+    blocks = [];
+    var g = geom();
+    start.forEach(function (s) {
+      var el = document.createElement('button');
+      el.type = 'button';
+      el.className = 'blk ' + s.cls;
+      el.innerHTML = ARROW.replace('REPLACE', PATHS[s.dir]);
+      el.style.width = g.cell + 'px';
+      el.style.height = g.cell + 'px';
+      el.style.left = (10 + s.col * g.step) + 'px';
+      el.setAttribute('aria-label', s.lead ? 'Pink block, arrow right. Tap to slide' : 'Block with arrow ' + s.dir);
+      if (s.lead) el.addEventListener('click', play);
+      else el.addEventListener('click', function () { comboEl.textContent = 'Try the pink one'; });
+      lane.appendChild(el);
+      blocks.push({ el: el, col: s.col });
+    });
+    comboEl.textContent = '';
+    busy = false;
+  }
+  function play() {
+    if (busy) return;
+    busy = true;
+    var g = geom();
+    var exit = 7;
+    // leader slides into each block in turn; whole train leaves the board
+    var t = 0, per = reduce ? 0 : 120;
+    blocks.forEach(function (b, i) {
+      var startDelay = i === 0 ? 0 : (b.col - 1) * per;
+      setTimeout(function () {
+        b.el.style.transform = 'translateX(' + ((exit - b.col) * g.step) + 'px)';
+        b.el.classList.add('gone');
+      }, startDelay);
+      t = Math.max(t, startDelay);
+    });
+    setTimeout(function () { comboEl.textContent = 'Combo x3 — 1 tap, 3 blocks'; }, t + 200);
+    setTimeout(build, t + 2200);
+  }
+  document.getElementById('toyReset').addEventListener('click', build);
+  new ResizeObserver(function () { if (!busy) build(); }).observe(lane);
+
+})();
+</script>
+
+</body>
+</html>
