@@ -20,5 +20,6 @@
   "created": "2026-10-26",
   "updated": "2026-10-26",
   "hasVideo": true,
-  "hasPlay": true
+  "hasPlay": true,
+  "note": "Early web prototype to test the core mechanic. Placeholder art and no sound yet; the production build will be made in Unity."
 }
