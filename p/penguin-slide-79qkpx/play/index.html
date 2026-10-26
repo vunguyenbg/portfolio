@@ -1,0 +1,1099 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0D2B4E">
+<meta name="description" content="Playable prototype: tap a penguin to belly-slide it and knock every penguin in its path into the sea.">
+<title>Penguin Slide</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Be+Vietnam+Pro:wght@500;600;700&display=swap">
+<style>
+:root {
+  --bg: #0D2B4E;
+  --panel: #1F5E96;
+  --panel-2: #17406A;
+  --ink: #F4F8FF;
+  --muted: #B8D4EE;
+  --card: #F1F5F8;
+  --card-ink: #15304D;
+  --accent: #FF7A33;
+  --accent-deep: #C9541A;
+  --font-display: "Baloo 2", "Trebuchet MS", system-ui, sans-serif;
+  --font-body: "Be Vietnam Pro", system-ui, -apple-system, "Segoe UI", sans-serif;
+  color-scheme: dark;
+}
+[hidden] { display: none !important; }
+html, body { height: 100%; margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-body);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+.app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-block: 12px 14px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  box-sizing: border-box;
+  max-width: 720px;
+  margin: 0 auto;
+}
+.hud { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.level { display: flex; flex-direction: column; line-height: 1; }
+.level small { font-size: 11px; font-weight: 700; letter-spacing: 0.12em; color: var(--muted); text-transform: uppercase; }
+.level b { font-family: var(--font-display); font-size: 28px; font-weight: 800; }
+.stats { display: flex; gap: 8px; }
+.stat {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-width: 74px; height: 52px; padding: 0 10px; box-sizing: border-box;
+  border-radius: 16px; background: var(--panel-2); line-height: 1;
+}
+.stat b { font-family: var(--font-display); font-size: 24px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.stat small { font-size: 11px; font-weight: 700; color: var(--muted); margin-top: 3px; white-space: nowrap; }
+.stat.taps { background: var(--card); color: var(--card-ink); }
+.stat.taps small { color: #4F6A86; }
+.stat.colony b { color: #FFD24A; }
+.stat.shake { animation: shake 0.4s; }
+.stat.bump { animation: bump 0.35s; }
+@keyframes shake { 0%,100%{transform:translateX(0)} 20%{transform:translateX(-6px)} 40%{transform:translateX(6px)} 60%{transform:translateX(-4px)} 80%{transform:translateX(4px)} }
+@keyframes bump { 0%,100%{transform:scale(1)} 40%{transform:scale(1.14)} }
+.stage { position: relative; flex: 1; min-height: 0; border-radius: 22px; overflow: hidden; background: var(--panel); }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; }
+.hint {
+  position: absolute; left: 12px; right: 12px; top: 10px; z-index: 2;
+  margin: 0 auto; max-width: 400px;
+  background: rgba(8, 40, 70, 0.86);
+  border-radius: 12px; padding: 7px 12px;
+  font-size: 13px; font-weight: 600; line-height: 1.4;
+  color: var(--ink); text-align: center; text-wrap: balance;
+  pointer-events: none; transition: opacity 0.3s;
+}
+.combo {
+  position: absolute; left: 50%; top: 24%; z-index: 3;
+  transform: translate(-50%, -50%) scale(0.6);
+  font-family: var(--font-display); font-weight: 800; font-size: 46px;
+  color: #FFE070; text-shadow: 0 3px 0 #C25A1C, 0 6px 18px rgba(0,0,0,0.35);
+  pointer-events: none; opacity: 0; white-space: nowrap;
+}
+.combo.show { animation: combo 1s ease-out forwards; }
+@keyframes combo {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+  20% { opacity: 1; transform: translate(-50%, -50%) scale(1.15); }
+  35% { transform: translate(-50%, -50%) scale(1); }
+  80% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -80%) scale(1); }
+}
+.toast {
+  position: absolute; left: 50%; bottom: 12px; z-index: 2; transform: translateX(-50%);
+  background: #0B3A63; color: #FFFFFF;
+  font-weight: 700; font-size: 14px;
+  border-radius: 999px; padding: 8px 14px;
+  white-space: nowrap; pointer-events: none;
+  opacity: 0; transition: opacity 0.25s;
+}
+.toast.show { opacity: 1; }
+.controls { display: flex; align-items: center; justify-content: space-between; gap: 10px; }
+.tools { display: flex; gap: 8px; }
+.tool {
+  width: 56px; height: 56px; border-radius: 18px; border: none;
+  background: var(--panel-2); color: var(--ink);
+  display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px;
+  cursor: pointer; box-shadow: inset 0 -4px 0 rgba(0,0,0,0.28);
+  font-family: var(--font-body); font-size: 10px; font-weight: 700;
+}
+.tool:disabled { opacity: 0.4; cursor: default; }
+.tool.wide { width: auto; padding: 0 18px; flex-direction: row; gap: 8px; font-family: var(--font-display); font-size: 18px; font-weight: 800; background: #EDC25A; color: #3A2A00; box-shadow: inset 0 -4px 0 #B8902E; }
+button:focus-visible { outline: 3px solid #FFC93C; outline-offset: 2px; }
+.modal {
+  position: fixed; inset: 0; z-index: 20;
+  display: flex; align-items: center; justify-content: center;
+  padding: 24px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+  background: rgba(4, 22, 40, 0.55);
+}
+.card {
+  width: 100%; max-width: 340px;
+  background: var(--card); color: var(--card-ink);
+  border-radius: 26px; padding: 22px 20px 18px;
+  display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center;
+  animation: pop 0.35s cubic-bezier(.2,1.4,.4,1);
+}
+@keyframes pop { from { transform: scale(0.8); opacity: 0 } to { transform: scale(1); opacity: 1 } }
+.card h2 { margin: 0; font-family: var(--font-display); font-size: 30px; font-weight: 800; line-height: 1.1; text-wrap: balance; }
+.card p { margin: 0; font-size: 15px; line-height: 1.45; color: #46607C; text-wrap: balance; }
+.card .gain { font-family: var(--font-display); font-size: 20px; font-weight: 800; color: #0E7FC0; }
+.stars { display: flex; gap: 6px; }
+.stars svg { width: 38px; height: 38px; }
+.card .actions { display: flex; gap: 8px; width: 100%; margin-top: 4px; }
+.card button { flex: 1; height: 50px; border: none; border-radius: 16px; font-family: var(--font-display); font-size: 18px; font-weight: 800; cursor: pointer; }
+.btn-main { background: var(--accent); color: #FFFFFF; box-shadow: inset 0 -4px 0 var(--accent-deep); }
+.btn-alt { background: #E3EEF7; color: var(--card-ink); }
+@media (prefers-reduced-motion: reduce) { .card, .stat.shake, .stat.bump, .combo.show { animation: none; } .combo.show { opacity: 1; transform: translate(-50%, -50%); } }
+</style>
+
+<meta property="og:title" content="Penguin Slide">
+</head>
+<body>
+<div class="app">
+  <header class="hud">
+    <div class="level">
+      <small>Level</small>
+      <b id="levelNum">1/7</b>
+    </div>
+    <div class="stats">
+      <div class="stat colony" id="colonyBox" aria-label="Penguins in your colony">
+        <b id="colony">0</b>
+        <small>colony</small>
+      </div>
+      <div class="stat" aria-label="Penguins left on the ice">
+        <b id="left">3</b>
+        <small>on the ice</small>
+      </div>
+      <div class="stat taps" id="tapsBox" aria-label="Taps left">
+        <b id="taps">1</b>
+        <small>taps left</small>
+      </div>
+    </div>
+  </header>
+
+  <main class="stage" id="stage">
+    <canvas id="scene" aria-label="3D ice floe: tap a penguin to belly-slide it and knock the penguins ahead into the sea"></canvas>
+    <p class="hint" id="hint"></p>
+    <div class="combo" id="combo" aria-hidden="true"></div>
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </main>
+
+  <footer class="controls">
+    <div class="tools">
+      <button class="tool" id="undoBtn" aria-label="Undo last tap">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 22 22"><path d="M8 5 L3 10 L8 15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path><path d="M3.5 10 H13 A5 5 0 0 1 13 20 H10" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path></svg>
+        Undo
+      </button>
+      <button class="tool" id="resetBtn" aria-label="Restart level">
+        <svg aria-hidden="true" width="22" height="22" viewBox="0 0 20 20"><path d="M4 10 A6 6 0 1 0 6 5.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"></path><path d="M3 2.5 V7 H7.5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"></path></svg>
+        Restart
+      </button>
+    </div>
+    <button class="tool wide" id="hintBtn" aria-label="Show a hint">
+      <svg aria-hidden="true" width="20" height="20" viewBox="0 0 20 20"><path d="M10 2 A6 6 0 0 1 13.5 12.8 V15 H6.5 V12.8 A6 6 0 0 1 10 2 Z" fill="currentColor"></path><rect x="7" y="16.2" width="6" height="2" rx="1" fill="currentColor"></rect></svg>
+      Hint
+    </button>
+  </footer>
+</div>
+
+<div class="modal" id="modal" hidden>
+  <div class="card" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="stars" id="stars"></div>
+    <h2 id="modalTitle"></h2>
+    <p class="gain" id="modalGain"></p>
+    <p id="modalText"></p>
+    <div class="actions" id="modalActions"></div>
+  </div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  // pieces: [row, col, dir]; dir 0 up, 1 right, 2 down, 3 left. Every level is solver-checked within "par" taps.
+  var LEVELS = [{"rows":3,"cols":5,"rocks":[],"pieces":[[1,0,1],[1,2,0],[1,4,2]],"par":1,"solution":[[1,0]]},{"rows":4,"cols":4,"rocks":[[1,3]],"pieces":[[1,1,1],[3,1,0],[0,3,3]],"par":2,"solution":[[3,1],[0,3]]},{"rows":5,"cols":5,"rocks":[[4,0],[3,3]],"pieces":[[1,3,2],[0,0,2],[1,2,0],[3,4,2],[1,4,3],[1,0,3],[0,4,3]],"par":3,"solution":[[3,4],[1,4],[0,4]]},{"rows":5,"cols":5,"rocks":[[4,4],[3,1],[1,4]],"pieces":[[0,0,0],[1,0,1],[2,0,0],[2,2,3],[0,2,2],[3,4,3],[2,3,2],[3,3,0],[4,2,1]],"par":4,"solution":[[2,0],[3,4],[0,2],[2,3]]},{"rows":6,"cols":5,"rocks":[[0,4],[4,4],[5,3]],"pieces":[[3,0,1],[1,2,3],[1,4,0],[3,4,1],[1,0,1],[3,2,3],[3,3,3],[2,3,2],[1,3,3],[0,2,3],[4,2,1]],"par":5,"solution":[[1,0],[2,3],[3,0],[4,3],[0,2]]},{"rows":6,"cols":6,"rocks":[[0,5],[0,4],[3,4],[5,3]],"pieces":[[2,5,3],[4,0,1],[5,0,2],[5,4,0],[4,5,0],[2,0,3],[1,3,2],[3,0,2],[0,2,1],[2,4,0],[2,1,1],[3,2,0],[1,2,1]],"par":6,"solution":[[2,5],[5,4],[4,0],[3,0],[1,2],[3,2]]},{"rows":7,"cols":6,"rocks":[[2,5],[3,0],[0,4],[4,5]],"pieces":[[0,5,0],[6,2,3],[6,4,0],[3,3,0],[3,2,1],[2,1,1],[4,3,0],[2,3,2],[4,2,1],[5,2,0],[0,2,2],[5,5,2],[5,4,3],[2,0,1],[5,3,0]],"par":6,"solution":[[0,5],[5,5],[2,0],[2,4],[0,2],[5,3]]}];
+  var HINTS = [
+    'Tap the penguin facing right. It belly-slides and knocks the other two into the sea.',
+    'This penguin is stuck behind a rock. Knock it into the sea with another penguin.',
+    'Taps are limited. Find the slide that splashes the most penguins.'
+  ];
+  var DR = [-1, 0, 1, 0];
+  var DC = [0, 1, 0, -1];
+  var SCARF = [0xFFC21A, 0xFF4F86, 0x2ED389, 0x9B6BFF];
+  var S = 1.0;
+  var SPEED = 9;
+  var WATER_Y = -0.42;
+  var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function col(h) { return new THREE.Color(h).convertSRGBToLinear(); }
+
+  // ---------- Rules (same as the solver) ----------
+  function applyMove(lv, rockSet, pieces, idx) {
+    var p = pieces[idx];
+    var occ = {};
+    pieces.forEach(function (q, i) { occ[q.r * 100 + q.c] = i; });
+    var d = p.d, r = p.r, c = p.c;
+    var train = [idx], rockHit = false;
+    while (true) {
+      r += DR[d]; c += DC[d];
+      if (r < 0 || r >= lv.rows || c < 0 || c >= lv.cols) break;
+      if (rockSet[r * 100 + c]) { rockHit = true; break; }
+      if (occ[r * 100 + c] !== undefined) train.push(occ[r * 100 + c]);
+    }
+    var next = pieces.map(function (q) { return { r: q.r, c: q.c, d: q.d, id: q.id }; });
+    var removed = {}, changed = false, finals = [];
+    if (!rockHit) {
+      train.forEach(function (i) { removed[i] = 1; finals.push(null); });
+      changed = true;
+    } else {
+      for (var k = train.length - 1, slot = 1; k >= 0; k--, slot++) {
+        var nr = r - DR[d] * slot, nc = c - DC[d] * slot;
+        var q = next[train[k]];
+        if (q.r !== nr || q.c !== nc) changed = true;
+        q.r = nr; q.c = nc;
+        finals[k] = { r: nr, c: nc };
+      }
+    }
+    if (!changed) return null;
+    return {
+      pieces: next.filter(function (_, i) { return !removed[i]; }),
+      train: train, rockHit: rockHit, finals: finals, d: d, rockR: r, rockC: c
+    };
+  }
+  function stateKey(pieces) {
+    return pieces.map(function (p) { return p.r + ',' + p.c + ',' + p.d; }).sort().join('|');
+  }
+  function solveFirst(lv, rockSet, pieces, maxDepth) {
+    var frontier = [{ pieces: pieces, first: -1 }];
+    var seen = {}; seen[stateKey(pieces)] = 1;
+    for (var depth = 0; depth < maxDepth; depth++) {
+      var nf = [];
+      for (var s = 0; s < frontier.length; s++) {
+        var st = frontier[s];
+        for (var i = 0; i < st.pieces.length; i++) {
+          var res = applyMove(lv, rockSet, st.pieces, i);
+          if (!res) continue;
+          var first = st.first < 0 ? st.pieces[i].id : st.first;
+          if (!res.pieces.length) return first;
+          var k = stateKey(res.pieces);
+          if (seen[k]) continue;
+          seen[k] = 1;
+          nf.push({ pieces: res.pieces, first: first });
+        }
+      }
+      frontier = nf;
+      if (!frontier.length || frontier.length > 200000) break;
+    }
+    return null;
+  }
+
+  // ---------- DOM ----------
+  var $ = function (id) { return document.getElementById(id); };
+  var stageEl = $('stage'), canvas = $('scene');
+  var elLevel = $('levelNum'), elLeft = $('left'), elTaps = $('taps'), elTapsBox = $('tapsBox');
+  var elColony = $('colony'), elColonyBox = $('colonyBox');
+  var elHint = $('hint'), elToast = $('toast'), elCombo = $('combo');
+  var undoBtn = $('undoBtn'), resetBtn = $('resetBtn'), hintBtn = $('hintBtn');
+  var modal = $('modal');
+
+  // ---------- State ----------
+  var game = {
+    levelIdx: 0, lv: null, rockSet: {}, pieces: [], tapsLeft: 0, used: 0,
+    history: [], phase: 'ready', anim: null, hintId: null, colony: 0, splashedThisLevel: 0
+  };
+  function save() { try { localStorage.setItem('penguin-slide', JSON.stringify({ level: game.levelIdx, colony: game.colony })); } catch (e) {} }
+  function load() {
+    try {
+      var d = JSON.parse(localStorage.getItem('penguin-slide') || 'null');
+      if (d && typeof d.level === 'number' && d.level >= 0 && d.level < LEVELS.length) game.levelIdx = d.level;
+      if (d && typeof d.colony === 'number' && d.colony >= 0) game.colony = d.colony;
+    } catch (e) {}
+  }
+
+  // ---------- Three.js ----------
+  var renderer = new THREE.WebGLRenderer({ canvas: canvas, antialias: true });
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+  renderer.outputEncoding = THREE.sRGBEncoding;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 0.95;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  var scene = new THREE.Scene();
+  var BG = col(0x154F86);
+  scene.background = BG;
+  scene.fog = new THREE.Fog(BG, 14, 30);
+  var camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+
+  scene.add(new THREE.HemisphereLight(col(0xFFFFFF), col(0x2C6FA8), 0.8));
+  var sun = new THREE.DirectionalLight(col(0xFFE9C8), 1.45);
+  sun.position.set(-3.5, 10, 4.5);
+  sun.castShadow = true;
+  sun.shadow.mapSize.set(2048, 2048);
+  sun.shadow.camera.left = -8; sun.shadow.camera.right = 8;
+  sun.shadow.camera.top = 8; sun.shadow.camera.bottom = -8;
+  sun.shadow.camera.near = 1; sun.shadow.camera.far = 25;
+  sun.shadow.bias = -0.0005;
+  sun.shadow.normalBias = 0.03;
+  sun.shadow.radius = 3;
+  scene.add(sun);
+  var rim = new THREE.DirectionalLight(col(0xBFE6FF), 0.45);
+  rim.position.set(4, 3, -6);
+  scene.add(rim);
+
+  function canvasTex(w, h, draw) {
+    var cv = document.createElement('canvas');
+    cv.width = w; cv.height = h;
+    draw(cv.getContext('2d'), w, h);
+    var t = new THREE.CanvasTexture(cv);
+    t.encoding = THREE.sRGBEncoding;
+    t.anisotropy = 4;
+    return t;
+  }
+  function roundedRectShape(w, h, r) {
+    var s = new THREE.Shape(), x = -w / 2, y = -h / 2;
+    s.moveTo(x + r, y);
+    s.lineTo(x + w - r, y); s.quadraticCurveTo(x + w, y, x + w, y + r);
+    s.lineTo(x + w, y + h - r); s.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+    s.lineTo(x + r, y + h); s.quadraticCurveTo(x, y + h, x, y + h - r);
+    s.lineTo(x, y + r); s.quadraticCurveTo(x, y, x + r, y);
+    return s;
+  }
+  function roundedBox(w, d, h, r, bevel) {
+    var g = new THREE.ExtrudeGeometry(roundedRectShape(w - bevel * 2, d - bevel * 2, r), {
+      depth: h - bevel * 2, bevelEnabled: true, bevelThickness: bevel, bevelSize: bevel, bevelSegments: 4, curveSegments: 10
+    });
+    g.rotateX(-Math.PI / 2);
+    g.translate(0, bevel, 0);
+    g.computeVertexNormals();
+    return g;
+  }
+
+  // Materials
+  var iceSideMat = new THREE.MeshStandardMaterial({ color: col(0x3584BE), roughness: 0.5 });
+  var snowMat = new THREE.MeshStandardMaterial({ color: col(0xB4D9EE), roughness: 0.9 });
+  var tileMat = new THREE.MeshStandardMaterial({ color: col(0x84C2E6), roughness: 0.7 });
+  var tileMat2 = new THREE.MeshStandardMaterial({ color: col(0x76B6DE), roughness: 0.7 });
+  var rockMat = new THREE.MeshStandardMaterial({ color: col(0x5E6B80), roughness: 0.85, flatShading: true });
+  var waterMat = new THREE.MeshStandardMaterial({ color: col(0x0A4888), roughness: 0.6, metalness: 0.0, flatShading: true });
+  var foamMat = new THREE.MeshBasicMaterial({ color: col(0xBFE6FA), transparent: true, opacity: 0.35, depthWrite: false });
+
+  var blackMat = new THREE.MeshStandardMaterial({ color: col(0x1A2238), roughness: 0.45 });
+  var whiteMat = new THREE.MeshStandardMaterial({ color: col(0xF4F6F8), roughness: 0.6 });
+  var orangeMat = new THREE.MeshStandardMaterial({ color: col(0xFF8A1E), roughness: 0.5 });
+  var eyeMat = new THREE.MeshStandardMaterial({ color: col(0x0B0F1A), roughness: 0.15 });
+  var glintMat = new THREE.MeshBasicMaterial({ color: col(0xFFFFFF) });
+  var cheekMat = new THREE.MeshStandardMaterial({ color: col(0xFF9BB3), roughness: 0.6 });
+  var scarfMats = SCARF.map(function (c) { return new THREE.MeshStandardMaterial({ color: col(c), roughness: 0.6 }); });
+  var hitMat = new THREE.MeshBasicMaterial({ visible: false });
+  var blobTex = canvasTex(64, 64, function (ctx) {
+    var gr = ctx.createRadialGradient(32, 32, 4, 32, 32, 31);
+    gr.addColorStop(0, 'rgba(10,20,35,0.55)'); gr.addColorStop(1, 'rgba(10,20,35,0)');
+    ctx.fillStyle = gr; ctx.fillRect(0, 0, 64, 64);
+  });
+  var blobMat = new THREE.MeshBasicMaterial({ map: blobTex, transparent: true, depthWrite: false });
+
+  var ringTex = canvasTex(128, 128, function (ctx) {
+    ctx.strokeStyle = '#FFFFFF'; ctx.lineWidth = 10;
+    ctx.beginPath(); ctx.arc(64, 64, 52, 0, Math.PI * 2); ctx.stroke();
+  });
+  var hintRing = new THREE.Mesh(new THREE.PlaneGeometry(1.3, 1.3), new THREE.MeshBasicMaterial({ map: ringTex, color: col(0xFF8A1F), transparent: true, depthWrite: false }));
+  hintRing.rotation.x = -Math.PI / 2;
+  hintRing.visible = false;
+  hintRing.renderOrder = 3;
+  scene.add(hintRing);
+
+  var boardGroup = new THREE.Group();
+  scene.add(boardGroup);
+  var fxGroup = new THREE.Group();
+  scene.add(fxGroup);
+
+  // Sea with gentle faceted waves
+  var waterGeo = new THREE.PlaneGeometry(70, 70, 70, 70);
+  waterGeo.rotateX(-Math.PI / 2);
+  var waterBase = Float32Array.from(waterGeo.attributes.position.array);
+  var water = new THREE.Mesh(waterGeo, waterMat);
+  water.position.y = WATER_Y;
+  water.receiveShadow = true;
+  scene.add(water);
+
+  // Small drifting ice chunks far away
+  var floaters = [];
+  (function () {
+    var spots = [[-6.5, -5], [6.8, -3.5], [-7.2, 2.5], [7.5, 4], [-3.5, -8], [4.5, -8.5]];
+    spots.forEach(function (s, i) {
+      var g = new THREE.Mesh(roundedBox(0.8 + (i % 3) * 0.35, 0.6 + (i % 2) * 0.4, 0.35, 0.18, 0.06), snowMat);
+      g.position.set(s[0], WATER_Y - 0.2, s[1]);
+      g.rotation.y = i * 1.3;
+      g.castShadow = true;
+      scene.add(g);
+      floaters.push({ m: g, ph: i * 1.7 });
+    });
+  })();
+
+  // ---------- Penguin ----------
+  var G = {
+    body: new THREE.SphereGeometry(0.3, 24, 18),
+    head: new THREE.SphereGeometry(0.24, 24, 18),
+    mask: new THREE.SphereGeometry(0.2, 22, 16),
+    tuft: new THREE.ConeGeometry(0.05, 0.12, 8),
+    eye: new THREE.SphereGeometry(0.05, 14, 10),
+    glint: new THREE.SphereGeometry(0.017, 8, 6),
+    beak: new THREE.ConeGeometry(0.07, 0.17, 12),
+    foot: new THREE.SphereGeometry(0.075, 12, 8),
+    flipper: new THREE.SphereGeometry(0.15, 14, 10),
+    scarf: new THREE.TorusGeometry(0.19, 0.055, 10, 24),
+    tail: new THREE.BoxGeometry(0.08, 0.04, 0.2),
+    hit: new THREE.BoxGeometry(0.92, 0.8, 0.92),
+    blob: new THREE.PlaneGeometry(0.82, 0.95)
+  };
+  G.beak.rotateX(Math.PI / 2);
+
+  function mesh(geo, mat, x, y, z, sx, sy, sz) {
+    var m = new THREE.Mesh(geo, mat);
+    m.position.set(x, y, z);
+    if (sx !== undefined) m.scale.set(sx, sy, sz);
+    m.castShadow = true;
+    return m;
+  }
+
+  // Lying on its belly, facing +Z. Outer group carries position + heading; "pose" does squash/wobble.
+  function makePenguin(p) {
+    var g = new THREE.Group();
+    var pose = new THREE.Group();
+    var inner = new THREE.Group();
+    inner.scale.setScalar(0.86);
+    pose.add(inner);
+    g.add(pose);
+
+    var back = mesh(G.body, blackMat, 0, 0.27, -0.06, 0.95, 0.8, 1.12);
+    back.rotation.x = -0.3;
+    var belly = mesh(G.body, whiteMat, 0, 0.23, 0.05, 0.9, 0.72, 1.08);
+    belly.rotation.x = -0.3;
+    inner.add(back, belly);
+
+    var head = new THREE.Group();
+    head.position.set(0, 0.5, 0.3);
+    head.add(mesh(G.head, blackMat, 0, 0, 0));
+    head.add(mesh(G.mask, whiteMat, 0, -0.01, 0.1, 0.95, 0.88, 0.75));
+    [-1, 1].forEach(function (s) {
+      head.add(mesh(G.eye, eyeMat, s * 0.085, 0.045, 0.205, 1, 1.15, 0.7));
+      head.add(mesh(G.glint, glintMat, s * 0.085 + 0.014, 0.068, 0.235));
+      head.add(mesh(G.eye, cheekMat, s * 0.145, -0.035, 0.17, 1, 0.65, 0.45));
+    });
+    head.add(mesh(G.beak, orangeMat, 0, -0.025, 0.27));
+    head.add(mesh(G.tuft, blackMat, 0.02, 0.24, -0.02));
+    inner.add(head);
+
+    var scarf = mesh(G.scarf, scarfMats[p.d], 0, 0.38, 0.19, 1, 1, 1);
+    scarf.rotation.x = -0.55;
+    inner.add(scarf);
+    var tail = mesh(G.tail, scarfMats[p.d], 0.13, 0.46, 0.05);
+    tail.rotation.set(-0.5, 0.5, 0.2);
+    inner.add(tail);
+
+    var flippers = [-1, 1].map(function (s) {
+      var piv = new THREE.Group();
+      piv.position.set(s * 0.26, 0.26, 0.06);
+      var f = mesh(G.flipper, blackMat, s * 0.1, 0, -0.06, 0.9, 0.22, 0.55);
+      piv.add(f);
+      inner.add(piv);
+      return piv;
+    });
+    var feet = [-1, 1].map(function (s) {
+      var piv = new THREE.Group();
+      piv.position.set(s * 0.1, 0.1, -0.36);
+      piv.add(mesh(G.foot, orangeMat, 0, 0, -0.06, 1, 0.4, 1.5));
+      inner.add(piv);
+      return piv;
+    });
+
+    var blob = new THREE.Mesh(G.blob, blobMat);
+    blob.rotation.x = -Math.PI / 2;
+    blob.position.y = 0.005;
+    blob.renderOrder = 1;
+    g.add(blob);
+    var hit = new THREE.Mesh(G.hit, hitMat);
+    hit.position.y = 0.4;
+    g.add(hit);
+
+    g.rotation.y = Math.atan2(DC[p.d], DR[p.d]);
+    g.userData = { pose: pose, head: head, flippers: flippers, feet: feet, slide: 0, slideT: 0, squash: 0, seed: p.id * 1.37 };
+    g.traverse(function (o) { o.userData.pieceId = p.id; });
+    g.userData.pieceId = p.id;
+    return g;
+  }
+
+  function makeRock(r, c) {
+    var g = new THREE.Group();
+    var geo = new THREE.DodecahedronGeometry(0.4, 1);
+    var pos = geo.attributes.position, v = new THREE.Vector3();
+    for (var i = 0; i < pos.count; i++) {
+      v.fromBufferAttribute(pos, i);
+      var n = 1 + 0.12 * Math.sin(v.x * 9 + r) * Math.cos(v.z * 8 + c);
+      v.multiplyScalar(n);
+      if (v.y < -0.1) v.y = -0.1;
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    geo.computeVertexNormals();
+    var m = new THREE.Mesh(geo, rockMat);
+    m.scale.set(1.1, 1.05, 1.1);
+    m.position.y = 0.12;
+    m.castShadow = true; m.receiveShadow = true;
+    var cap = new THREE.Mesh(new THREE.SphereGeometry(0.28, 16, 10, 0, Math.PI * 2, 0, Math.PI / 2), snowMat);
+    cap.scale.set(1.2, 0.45, 1.1);
+    cap.position.y = 0.44;
+    g.add(m, cap);
+    g.position.set(cellX(c), 0, cellZ(r));
+    return g;
+  }
+
+  function cellX(c) { return (c - (game.lv.cols - 1) / 2) * S; }
+  function cellZ(r) { return (r - (game.lv.rows - 1) / 2) * S; }
+
+  var foam = null;
+  function buildBoard() {
+    while (boardGroup.children.length) boardGroup.remove(boardGroup.children[0]);
+    var lv = game.lv;
+    var w = lv.cols * S + 0.45, d = lv.rows * S + 0.45;
+    var base = new THREE.Mesh(roundedBox(w, d, 0.62, 0.38, 0.1), iceSideMat);
+    base.position.y = -0.66;
+    base.receiveShadow = true; base.castShadow = true;
+    boardGroup.add(base);
+    var top = new THREE.Mesh(roundedBox(w - 0.06, d - 0.06, 0.1, 0.36, 0.04), snowMat);
+    top.position.y = -0.1;
+    top.receiveShadow = true;
+    boardGroup.add(top);
+    var tileGeo = roundedBox(0.94, 0.94, 0.04, 0.16, 0.015);
+    for (var r = 0; r < lv.rows; r++) {
+      for (var c = 0; c < lv.cols; c++) {
+        var t = new THREE.Mesh(tileGeo, (r + c) % 2 ? tileMat : tileMat2);
+        t.position.set(cellX(c), -0.03, cellZ(r));
+        t.receiveShadow = true;
+        boardGroup.add(t);
+      }
+    }
+    foam = new THREE.Mesh(new THREE.ShapeGeometry(roundedRectShape(w + 0.5, d + 0.5, 0.6), 12), foamMat);
+    foam.rotation.x = -Math.PI / 2;
+    foam.position.y = WATER_Y + 0.03;
+    foam.renderOrder = 1;
+    boardGroup.add(foam);
+    lv.rocks.forEach(function (rc) { boardGroup.add(makeRock(rc[0], rc[1])); });
+  }
+
+  // ---------- Level ----------
+  function buildLevel() {
+    var data = LEVELS[game.levelIdx];
+    game.lv = { rows: data.rows, cols: data.cols, rocks: data.rocks };
+    game.rockSet = {};
+    data.rocks.forEach(function (rc) { game.rockSet[rc[0] * 100 + rc[1]] = 1; });
+    game.par = data.par;
+    game.tapsLeft = data.par + (game.levelIdx < 2 ? 0 : 1);
+    game.used = 0;
+    game.history = [];
+    game.phase = 'ready';
+    game.anim = null;
+    game.splashedThisLevel = 0;
+    game.winPending = false;
+    timers = [];
+    clearFalling();
+    clearHint();
+    buildBoard();
+    setPieces(data.pieces.map(function (p, i) { return { r: p[0], c: p[1], d: p[2], id: i }; }));
+    elHint.textContent = HINTS[game.levelIdx] || '';
+    elHint.style.opacity = HINTS[game.levelIdx] ? '1' : '0';
+    if (game.levelIdx === 0) showHintFor(0);
+    fitCamera();
+    updateHud();
+    save();
+  }
+  var meshes = {};
+  function setPieces(list) {
+    Object.keys(meshes).forEach(function (k) { fxGroup.remove(meshes[k]); });
+    meshes = {};
+    game.pieces = list.map(function (p) { return { r: p.r, c: p.c, d: p.d, id: p.id }; });
+    game.pieces.forEach(function (p) {
+      var m = makePenguin(p);
+      m.position.set(cellX(p.c), 0, cellZ(p.r));
+      fxGroup.add(m);
+      meshes[p.id] = m;
+    });
+  }
+
+  // ---------- HUD ----------
+  function updateHud() {
+    elLevel.textContent = (game.levelIdx + 1) + '/' + LEVELS.length;
+    elLeft.textContent = String(game.pieces.length);
+    elTaps.textContent = String(game.tapsLeft);
+    elColony.textContent = String(game.colony);
+    undoBtn.disabled = !game.history.length || game.phase !== 'ready';
+    hintBtn.disabled = game.phase !== 'ready';
+  }
+  var toastTimer = 0;
+  function toast(msg) {
+    elToast.textContent = msg;
+    elToast.classList.add('show');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { elToast.classList.remove('show'); }, 1900);
+  }
+  function restart(el, cls) { el.classList.remove(cls); void el.offsetWidth; el.classList.add(cls); }
+  function showCombo(n) {
+    elCombo.textContent = n >= 5 ? 'Mega splash! x' + n : 'Splash x' + n;
+    restart(elCombo, 'show');
+  }
+
+  // ---------- Camera ----------
+  var camBase = { dist: 10, el: 57 * Math.PI / 180 }, shake = 0;
+  function fitCamera() {
+    var w = stageEl.clientWidth || 1, h = stageEl.clientHeight || 1;
+    renderer.setSize(w, h, false);
+    camera.aspect = w / h;
+    var lv = game.lv;
+    var bw = lv.cols * S + 3.4, bd = lv.rows * S + 2.4;
+    var t = Math.tan(camera.fov * Math.PI / 360);
+    var needH = (bd * Math.sin(camBase.el) + 1.2) / (2 * t);
+    var needW = bw / (2 * t * camera.aspect);
+    camBase.dist = Math.max(needH, needW) * 1.02;
+    scene.fog.near = camBase.dist * 1.5;
+    scene.fog.far = camBase.dist * 4.2;
+    camera.updateProjectionMatrix();
+    placeCamera();
+  }
+  function placeCamera() {
+    var d = camBase.dist;
+    var sx = shake ? (Math.random() - 0.5) * shake * 0.12 : 0;
+    var sy = shake ? (Math.random() - 0.5) * shake * 0.08 : 0;
+    camera.position.set(sx, Math.sin(camBase.el) * d + sy, Math.cos(camBase.el) * d + 0.2);
+    camera.lookAt(sx, 0, 0.3);
+  }
+  new ResizeObserver(function () { if (game.lv) fitCamera(); }).observe(stageEl);
+
+  // ---------- Hint ----------
+  function clearHint() { game.hintId = null; hintRing.visible = false; }
+  function showHintFor(id) {
+    var p = game.pieces.filter(function (q) { return q.id === id; })[0];
+    if (!p) return;
+    game.hintId = id;
+    hintRing.position.set(cellX(p.c), 0.03, cellZ(p.r));
+    hintRing.visible = true;
+  }
+  hintBtn.addEventListener('click', function () {
+    if (game.phase !== 'ready') return;
+    var id = solveFirst(game.lv, game.rockSet, game.pieces, Math.max(game.tapsLeft, 0));
+    if (id === null) {
+      toast(game.tapsLeft > 0 ? 'No winning line left. Undo or restart.' : 'Out of taps. Undo or restart.');
+      return;
+    }
+    showHintFor(id);
+  });
+
+  // ---------- Input ----------
+  var raycaster = new THREE.Raycaster(), ndc = new THREE.Vector2();
+  canvas.addEventListener('pointerdown', function (e) {
+    if (game.phase !== 'ready') return;
+    var rect = canvas.getBoundingClientRect();
+    ndc.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    ndc.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+    raycaster.setFromCamera(ndc, camera);
+    var hits = raycaster.intersectObjects(fxGroup.children, true);
+    for (var i = 0; i < hits.length; i++) {
+      var id = hits[i].object.userData.pieceId;
+      if (id !== undefined && meshes[id]) { tapPiece(id); return; }
+    }
+  });
+
+  function tapPiece(id) {
+    var idx = -1;
+    game.pieces.forEach(function (p, i) { if (p.id === id) idx = i; });
+    if (idx < 0) return;
+    if (game.tapsLeft <= 0) { restart(elTapsBox, 'shake'); toast('Out of taps. Undo or restart.'); return; }
+    var res = applyMove(game.lv, game.rockSet, game.pieces, idx);
+    if (!res) {
+      nudge(id, game.pieces[idx].d);
+      toast('Blocked by a rock');
+      return;
+    }
+    elHint.style.opacity = '0';
+    clearHint();
+    game.history.push({ pieces: game.pieces.map(function (p) { return { r: p.r, c: p.c, d: p.d, id: p.id }; }), taps: game.tapsLeft, colony: game.colony, splashed: game.splashedThisLevel });
+    game.tapsLeft -= 1;
+    game.used += 1;
+    startAnim(res);
+    updateHud();
+  }
+
+  var nudges = [];
+  function nudge(id, d) { nudges.push({ id: id, d: d, t: 0 }); }
+
+  // ---------- Chain slide animation ----------
+  function startAnim(res) {
+    var d = res.d;
+    var lead = game.pieces[res.train[0]];
+    var items = res.train.map(function (i, k) {
+      var p = game.pieces[i];
+      var s = Math.abs((p.r - lead.r) * DR[d]) + Math.abs((p.c - lead.c) * DC[d]);
+      var fin;
+      if (res.rockHit) {
+        var f = res.finals[k];
+        fin = Math.abs((f.r - lead.r) * DR[d]) + Math.abs((f.c - lead.c) * DC[d]);
+      } else {
+        fin = Infinity;
+      }
+      return { id: p.id, s: s, fin: fin, x: s, started: k === 0 };
+    });
+    var edge = 0, rr = lead.r, cc = lead.c;
+    while (rr >= 0 && rr < game.lv.rows && cc >= 0 && cc < game.lv.cols) { rr += DR[d]; cc += DC[d]; edge++; }
+    game.anim = { res: res, d: d, items: items, lead: { r: lead.r, c: lead.c }, t: -0.12, edge: edge };
+    var lm = meshes[lead.id];
+    if (lm) { lm.userData.slideT = 1; lm.userData.squash = 0.6; }
+    game.phase = 'anim';
+    if (res.train.length >= 3 && !res.rockHit) { showCombo(res.train.length); }
+    if (res.train.length >= 3) shake = Math.min(1, res.train.length * 0.16);
+    updateHud();
+  }
+
+  function stepAnim(dt) {
+    var A = game.anim;
+    A.t += dt;
+    if (A.t < 0) return; // little wind-up before the push-off
+    var lead = SPEED * A.t;
+    var items = A.items;
+    var allSettled = true;
+    for (var k = 0; k < items.length; k++) {
+      var it = items[k];
+      var want = k === 0 ? lead : Math.max(it.s, items[k - 1].x + 1);
+      var x = Math.min(it.fin, want);
+      if (!it.started && x > it.s + 0.001) {
+        it.started = true;
+        var m0 = meshes[it.id];
+        if (m0) { m0.userData.squash = 1; m0.userData.slideT = 1; puff(m0.position); }
+      }
+      it.x = Math.max(it.s, x);
+      var m = meshes[it.id];
+      if (m) {
+        m.position.x = cellX(A.lead.c) + DC[A.d] * it.x * S;
+        m.position.z = cellZ(A.lead.r) + DR[A.d] * it.x * S;
+        if (!A.res.rockHit && it.x > A.edge - 0.45 && !it.falling) {
+          it.falling = true;
+          game.falling.push({ mesh: m, state: 'air', vy: 1.3, vx: DC[A.d] * 2.6 + DR[A.d] * (Math.random() - 0.5) * 2.2, vz: DR[A.d] * 2.6 + DC[A.d] * (Math.random() - 0.5) * 2.2, dx: DC[A.d], dz: DR[A.d], spin: (Math.random() - 0.5) * 7, life: 0 });
+          delete meshes[it.id];
+        }
+      }
+      if (A.res.rockHit) { if (it.x < it.fin - 0.001) allSettled = false; }
+      else if (!it.falling) allSettled = false;
+    }
+    if (allSettled) {
+      if (A.res.rockHit) {
+        items.forEach(function (it) { var m = meshes[it.id]; if (m) { m.userData.squash = 0.8; m.userData.slideT = 0; } });
+      }
+      game.pieces = A.res.pieces;
+      game.pieces.forEach(function (p) { var m = meshes[p.id]; if (m) m.position.set(cellX(p.c), 0, cellZ(p.r)); });
+      game.anim = null;
+      game.phase = 'settle';
+      later(A.res.rockHit ? 0.06 : 0.25, function () {
+        if (game.phase !== 'settle') return;
+        game.phase = 'ready';
+        afterMove();
+      });
+    }
+  }
+
+  function afterMove() {
+    updateHud();
+    if (!game.pieces.length) {
+      game.phase = 'won';
+      game.winPending = true;
+    } else if (game.tapsLeft <= 0) {
+      game.phase = 'lost';
+      later(0.5, function () { if (game.phase === 'lost') showModal('lose'); });
+    }
+    updateHud();
+  }
+
+  // ---------- Effects ----------
+  var parts = [];
+  var dropGeo = new THREE.SphereGeometry(0.06, 8, 6);
+  var puffMat = new THREE.MeshBasicMaterial({ color: col(0xF2F8FF), transparent: true });
+  var dropMat = new THREE.MeshBasicMaterial({ color: col(0xD8F3FF), transparent: true });
+  function puff(pos) {
+    for (var i = 0; i < 8; i++) {
+      var m = new THREE.Mesh(dropGeo, puffMat.clone());
+      m.position.set(pos.x, 0.08, pos.z);
+      var a = Math.random() * Math.PI * 2;
+      m.userData = { v: new THREE.Vector3(Math.cos(a) * 1.6, 1 + Math.random(), Math.sin(a) * 1.6), life: 0.5, max: 0.5, g: 4 };
+      scene.add(m);
+      parts.push(m);
+    }
+  }
+  var ringGeo = new THREE.RingGeometry(0.3, 0.42, 32);
+  ringGeo.rotateX(-Math.PI / 2);
+  function splash(pos) {
+    for (var i = 0; i < 16; i++) {
+      var m = new THREE.Mesh(dropGeo, dropMat.clone());
+      m.position.set(pos.x, WATER_Y + 0.05, pos.z);
+      var a = Math.random() * Math.PI * 2, sp = 0.8 + Math.random() * 1.6;
+      var sc = 0.8 + Math.random() * 1.3;
+      m.scale.setScalar(sc);
+      m.userData = { v: new THREE.Vector3(Math.cos(a) * sp, 2.6 + Math.random() * 2.2, Math.sin(a) * sp), life: 0.85, max: 0.85, g: 10, floor: WATER_Y };
+      scene.add(m);
+      parts.push(m);
+    }
+    for (var j = 0; j < 2; j++) {
+      var r = new THREE.Mesh(ringGeo, new THREE.MeshBasicMaterial({ color: col(0xFFFFFF), transparent: true, opacity: 0.9, depthWrite: false }));
+      r.position.set(pos.x, WATER_Y + 0.04, pos.z);
+      r.userData = { ring: true, life: 1.0 + j * 0.3, max: 1.0 + j * 0.3, grow: 2.2 - j * 0.7 };
+      scene.add(r);
+      parts.push(r);
+    }
+    shake = Math.max(shake, 0.25);
+  }
+  function onSplash() {
+    game.colony += 1;
+    game.splashedThisLevel += 1;
+    elColony.textContent = String(game.colony);
+    restart(elColonyBox, 'bump');
+    save();
+  }
+
+  // ---------- Undo / restart ----------
+  undoBtn.addEventListener('click', function () {
+    if (game.phase !== 'ready' || !game.history.length) return;
+    var h = game.history.pop();
+    game.tapsLeft = h.taps;
+    game.colony = h.colony;
+    game.splashedThisLevel = h.splashed;
+    game.used = Math.max(0, game.used - 1);
+    clearFalling();
+    setPieces(h.pieces);
+    clearHint();
+    updateHud();
+    save();
+  });
+  function restartLevel() {
+    hideModal();
+    // Penguins splashed on an unfinished attempt go back on the ice.
+    if (game.phase !== 'won') game.colony = Math.max(0, game.colony - game.splashedThisLevel);
+    buildLevel();
+  }
+  resetBtn.addEventListener('click', restartLevel);
+  function clearFalling() {
+    (game.falling || []).forEach(function (f) { fxGroup.remove(f.mesh); });
+    game.falling = [];
+  }
+  document.addEventListener('keydown', function (e) {
+    if (!modal.hidden) return;
+    if (e.key === 'r' || e.key === 'R') restartLevel();
+    if (e.key === 'z' || e.key === 'Z') undoBtn.click();
+  });
+
+  // ---------- Win / lose ----------
+  function starSvg(on) {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2.5 L14.9 8.6 L21.5 9.4 L16.6 13.9 L17.9 20.5 L12 17.2 L6.1 20.5 L7.4 13.9 L2.5 9.4 L9.1 8.6 Z" fill="' + (on ? '#FFB020' : '#D6E2EC') + '" stroke="' + (on ? '#B86F00' : '#B4C4D2') + '" stroke-width="1.4" stroke-linejoin="round"></path></svg>';
+  }
+  function showModal(kind) {
+    var title = $('modalTitle'), text = $('modalText'), gain = $('modalGain'), actions = $('modalActions'), stars = $('stars');
+    actions.innerHTML = '';
+    var last = game.levelIdx === LEVELS.length - 1;
+    if (kind === 'win') {
+      var n = game.used <= game.par ? 3 : 2;
+      stars.innerHTML = starSvg(true) + starSvg(true) + starSvg(n === 3);
+      stars.hidden = false;
+      title.textContent = last ? 'All floes cleared!' : 'Floe cleared!';
+      gain.hidden = false;
+      gain.textContent = '+' + game.splashedThisLevel + ' penguins swam to your island';
+      text.textContent = 'Colony: ' + game.colony + ' · ' + game.used + (game.used === 1 ? ' tap' : ' taps') + ' (best ' + game.par + ')';
+      var next = document.createElement('button');
+      next.className = 'btn-main';
+      next.textContent = last ? 'Play again from level 1' : 'Next level';
+      next.addEventListener('click', function () {
+        hideModal();
+        game.levelIdx = last ? 0 : game.levelIdx + 1;
+        buildLevel();
+      });
+      actions.appendChild(next);
+    } else {
+      stars.hidden = true;
+      gain.hidden = true;
+      title.textContent = 'Out of taps';
+      text.textContent = game.pieces.length + (game.pieces.length === 1 ? ' penguin' : ' penguins') + ' still on the ice. Look for a slide that pushes more of them at once.';
+      var undo = document.createElement('button');
+      undo.className = 'btn-alt';
+      undo.textContent = 'Undo';
+      undo.addEventListener('click', function () { hideModal(); game.phase = 'ready'; undoBtn.click(); });
+      var retry = document.createElement('button');
+      retry.className = 'btn-main';
+      retry.textContent = 'Restart';
+      retry.addEventListener('click', restartLevel);
+      actions.appendChild(undo);
+      actions.appendChild(retry);
+    }
+    modal.hidden = false;
+    var btn = actions.querySelector('.btn-main');
+    if (btn) btn.focus();
+  }
+  function hideModal() { modal.hidden = true; }
+
+  // ---------- Loop ----------
+  var clock = new THREE.Clock(), tAll = 0, timers = [];
+  function later(sec, fn) { timers.push({ t: sec, fn: fn }); }
+  function animatePenguin(m, dt, k) {
+    var u = m.userData;
+    u.slide += (u.slideT - u.slide) * Math.min(1, dt * 12);
+    if (u.squash > 0) u.squash = Math.max(0, u.squash - dt * 4);
+    var sq = reduceMotion ? 0 : Math.sin(u.squash * Math.PI) * 0.2;
+    var t = tAll + u.seed;
+    var idle = reduceMotion ? 0 : 1 - u.slide;
+    var breathe = Math.sin(t * 2.4) * 0.025 * idle;
+    u.pose.scale.set(1 + sq * 0.5, 1 - sq + breathe, 1 + sq * 0.3);
+    u.pose.rotation.z = Math.sin(t * 1.6) * 0.05 * idle;
+    // head looks up when idle, tucks down while sliding
+    u.head.rotation.x = -0.1 + Math.sin(t * 1.3) * 0.08 * idle + u.slide * 0.45;
+    u.head.rotation.y = Math.sin(t * 0.9) * 0.18 * idle;
+    var flap = reduceMotion ? 0 : Math.max(0, Math.sin(t * 3.1)) * 0.5 * idle;
+    u.flippers[0].rotation.set(0, -0.25 - u.slide * 0.5, -0.15 - flap);
+    u.flippers[1].rotation.set(0, 0.25 + u.slide * 0.5, 0.15 + flap);
+    var kick = reduceMotion ? 0 : Math.sin(t * 5) * 0.35 * idle + u.slide * 0.5;
+    u.feet[0].rotation.x = kick;
+    u.feet[1].rotation.x = -kick * 0.8 + u.slide * 0.9;
+  }
+
+  function tick(dtOverride) {
+    var dt = typeof dtOverride === 'number' ? dtOverride : Math.min(clock.getDelta(), 0.05);
+    tAll += dt;
+    for (var ti = timers.length - 1; ti >= 0; ti--) {
+      timers[ti].t -= dt;
+      if (timers[ti].t <= 0) { var fn = timers[ti].fn; timers.splice(ti, 1); fn(); }
+    }
+    if (game.winPending && game.falling.every(function (f) { return f.state === 'swim'; })) {
+      game.winPending = false;
+      later(0.6, function () { if (game.phase === 'won') showModal('win'); });
+    }
+    if (game.anim) stepAnim(dt);
+
+    // pushed off: fly, splash, then swim away
+    for (var i = game.falling.length - 1; i >= 0; i--) {
+      var fl = game.falling[i], fm = fl.mesh;
+      fl.life += dt;
+      if (fl.state === 'air') {
+        fl.vy -= 14 * dt;
+        fm.position.x += fl.vx * dt;
+        fm.position.z += fl.vz * dt;
+        fm.position.y += fl.vy * dt;
+        fm.userData.pose.rotation.x += dt * 4.5;
+        fm.rotation.y += fl.spin * dt * 0.4;
+        if (fm.position.y < WATER_Y - 0.15) {
+          fl.state = 'swim';
+          fl.life = 0;
+          splash(fm.position);
+          onSplash();
+          fm.userData.pose.rotation.x = 0;
+          fm.userData.slideT = 0;
+          fm.position.y = WATER_Y - 0.55;
+          var ang = Math.atan2(fl.dx, fl.dz) + (Math.random() - 0.5) * 2.4;
+          fm.rotation.y = ang;
+          fl.vx = Math.sin(ang) * 0.8; fl.vz = Math.cos(ang) * 0.8;
+        }
+      } else {
+        var up = Math.min(1, fl.life * 4);
+        fm.position.y = WATER_Y - 0.55 + up * 0.36 + Math.sin(fl.life * 7) * 0.03;
+        fm.position.x += fl.vx * dt;
+        fm.position.z += fl.vz * dt;
+        animatePenguin(fm, dt, 0);
+        if (fl.life > 1.5) {
+          var s = Math.max(0, 1 - (fl.life - 1.5) * 2.5);
+          fm.scale.setScalar(s);
+        }
+        if (fl.life > 1.95) { fxGroup.remove(fm); game.falling.splice(i, 1); }
+      }
+    }
+
+    Object.keys(meshes).forEach(function (k) { animatePenguin(meshes[k], dt, k); });
+
+    // wind-up lean before push-off
+    if (game.anim && game.anim.t < 0) {
+      var lm = meshes[game.pieces[game.anim.res.train[0]].id];
+      if (lm) {
+        var back = Math.sin((game.anim.t + 0.12) / 0.12 * Math.PI) * 0.12;
+        lm.position.x = cellX(game.anim.lead.c) - DC[game.anim.d] * back;
+        lm.position.z = cellZ(game.anim.lead.r) - DR[game.anim.d] * back;
+      }
+    }
+
+    for (var n = nudges.length - 1; n >= 0; n--) {
+      var nd = nudges[n];
+      nd.t += dt;
+      var m2 = meshes[nd.id];
+      var p = game.pieces.filter(function (q) { return q.id === nd.id; })[0];
+      if (m2 && p) {
+        var off = Math.sin(nd.t * 30) * 0.08 * Math.max(0, 1 - nd.t / 0.35);
+        m2.position.x = cellX(p.c) + DC[nd.d] * off;
+        m2.position.z = cellZ(p.r) + DR[nd.d] * off;
+      }
+      if (nd.t > 0.35) nudges.splice(n, 1);
+    }
+
+    for (var q = parts.length - 1; q >= 0; q--) {
+      var pf = parts[q], ud = pf.userData;
+      ud.life -= dt;
+      if (ud.ring) {
+        var gr = 1 + (1 - ud.life / ud.max) * ud.grow;
+        pf.scale.set(gr, 1, gr);
+        pf.material.opacity = Math.max(0, ud.life / ud.max) * 0.9;
+      } else {
+        ud.v.y -= ud.g * dt;
+        pf.position.addScaledVector(ud.v, dt);
+        pf.material.opacity = Math.max(0, ud.life / ud.max);
+        if (ud.floor !== undefined && pf.position.y < ud.floor) ud.life = 0;
+      }
+      if (ud.life <= 0) { scene.remove(pf); parts.splice(q, 1); }
+    }
+
+    if (hintRing.visible) {
+      var hs = 1 + Math.sin(tAll * 6) * 0.08;
+      hintRing.scale.set(hs, hs, hs);
+    }
+
+    // waves
+    var wp = waterGeo.attributes.position.array;
+    for (var wi = 0; wi < wp.length; wi += 3) {
+      var x = waterBase[wi], z = waterBase[wi + 2];
+      wp[wi + 1] = reduceMotion ? 0 : Math.sin(x * 0.9 + tAll * 1.4) * 0.06 + Math.cos(z * 0.75 + tAll * 1.1) * 0.05;
+    }
+    waterGeo.attributes.position.needsUpdate = true;
+    if (foam) {
+      var fs = 1 + Math.sin(tAll * 1.8) * 0.012;
+      foam.scale.set(fs, fs, 1);
+    }
+    floaters.forEach(function (f) { f.m.position.y = WATER_Y - 0.2 + Math.sin(tAll * 1.2 + f.ph) * 0.04; });
+
+    if (shake > 0) shake = Math.max(0, shake - dt * 2.5);
+    placeCamera();
+    renderer.render(scene, camera);
+  }
+  function loop() {
+    if (!window.__manual) tick();
+    requestAnimationFrame(loop);
+  }
+
+  // Hooks used for recording gameplay videos
+  window.__tick = function () { tick(window.__manualDt || 1 / 30); };
+  window.__load = function (i) { game.levelIdx = i; buildLevel(); };
+  window.__tapPiece = function (r, c) {
+    var p = game.pieces.filter(function (q) { return q.r === r && q.c === c; })[0];
+    if (p) tapPiece(p.id);
+  };
+  window.__screen = function (r, c) {
+    var v = new THREE.Vector3(cellX(c), 0.3, cellZ(r)).project(camera);
+    var rect = canvas.getBoundingClientRect();
+    return { x: rect.left + (v.x + 1) / 2 * rect.width, y: rect.top + (1 - v.y) / 2 * rect.height };
+  };
+  window.__game = game;
+
+  function start(data) {
+    load();
+    if (data && typeof data.level === 'number') game.levelIdx = Math.min(LEVELS.length - 1, Math.max(0, data.level));
+    buildLevel();
+    requestAnimationFrame(loop);
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.snapshot) {
+    window.claude.hot.snapshot(function () { return { level: game.levelIdx }; });
+  }
+  if (window.claude && window.claude.hot && window.claude.hot.ready) window.claude.hot.ready(start);
+  else start((window.claude && window.claude.hot && window.claude.hot.data) || {});
+})();
+</script>
+</body>
+</html>
