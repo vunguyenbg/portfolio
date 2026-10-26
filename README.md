@@ -24,7 +24,14 @@ _template/            Mẫu cho game mới (không hiện lên web)
 - Gửi publisher nào thì chỉ gửi link game của bên đó.
 - Không ghi link game riêng vào file nào trong repo (README, concepts.js...), vì repo là công khai.
 
-## Thêm một game mới
+## Thêm hoặc sửa game bằng trang quản trị (cách nhanh)
+
+Mở `https://vunguyenbg.github.io/portfolio/admin/`, dán GitHub token (làm theo hướng dẫn trên trang, chỉ cần một lần), rồi:
+
+- **+ Dự án mới**: điền tên, mô tả, chọn video .mp4 và/hoặc thư mục build (có index.html), bấm Đăng. Trang tự tạo link riêng, ảnh bìa và trang giới thiệu.
+- **Sửa**: thay video, thay bản chơi thử hoặc sửa nội dung trang của game đã có.
+
+## Thêm một game mới bằng tay
 
 1. Copy `_template` vào `p/`, đặt tên `ten-game-` cộng 6 ký tự ngẫu nhiên, ví dụ `p/fish-flow-k3m9xq`.
 2. Mở `index.html` trong thư mục đó, thay mọi chỗ trong ngoặc vuông `[...]`, thay `[slug]` bằng tên thư mục.

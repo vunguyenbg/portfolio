@@ -1,0 +1,574 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Quản lý dự án · Portfolio</title>
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#0E1530">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<link rel="stylesheet" href="../assets/site.css">
+<style>
+/* Trang quản trị riêng: chỉ chủ repo dùng, cần GitHub token mới đăng được. */
+main.ad { padding-block: 28px 80px; display: flex; flex-direction: column; gap: 22px; }
+.ad h1 { font-size: clamp(28px, 4vw, 38px); }
+.ad h2 { font-size: 22px; }
+.ad .sub { color: var(--muted); margin-top: 6px; }
+.ad .panel { display: flex; flex-direction: column; gap: 16px; }
+.ad label { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: 14px; }
+.ad label small { font-weight: 400; color: var(--muted); }
+.ad input[type=text], .ad input[type=password], .ad input[type=number], .ad textarea, .ad select {
+  font: inherit; font-weight: 400; color: var(--ink); background: var(--bg);
+  border: 1.5px solid var(--line); border-radius: 12px; padding: 10px 12px; width: 100%;
+}
+.ad textarea { min-height: 64px; resize: vertical; }
+.ad input:focus, .ad textarea:focus, .ad select:focus { outline: none; border-color: var(--yellow); }
+.ad input[type=file] { font: inherit; font-weight: 400; color: var(--muted); }
+.grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+@media (max-width: 640px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
+.row { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ad button { font: inherit; cursor: pointer; border: 0; }
+.ad .btn { border: 0; }
+.small-btn { font-size: 14px; font-weight: 700; padding: 7px 12px; border-radius: 10px; background: var(--surface-2); color: var(--ink); }
+.small-btn:hover { background: var(--line); }
+.status { font-size: 14px; color: var(--muted); }
+.status.ok { color: var(--green); }
+.status.err { color: var(--pink); }
+.proj { display: flex; justify-content: space-between; gap: 12px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); flex-wrap: wrap; }
+.proj:first-child { border-top: 0; }
+.proj b { display: block; }
+.proj code { font-family: var(--font-mono); font-size: 12px; color: var(--muted); word-break: break-all; }
+details summary { cursor: pointer; font-weight: 700; }
+details[open] summary { margin-bottom: 12px; }
+fieldset { border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin: 0; display: flex; flex-direction: column; gap: 14px; }
+legend { font-weight: 700; padding: 0 6px; }
+.tip { font-size: 14px; color: var(--muted); background: var(--surface-2); border-radius: 12px; padding: 10px 12px; }
+.tip b { color: var(--ink); }
+.bar { height: 10px; border-radius: 999px; background: var(--surface-2); overflow: hidden; }
+.bar i { display: block; height: 100%; width: 0; background: var(--green); transition: width 0.2s; }
+.result { background: rgba(46,211,137,0.12); border: 1px solid rgba(46,211,137,0.4); border-radius: 16px; padding: 16px; display: flex; flex-direction: column; gap: 10px; }
+.result a { word-break: break-all; font-weight: 700; color: var(--green); }
+ol.how { margin: 0; padding-left: 20px; color: var(--muted); font-size: 14px; display: flex; flex-direction: column; gap: 4px; }
+ol.how b { color: var(--ink); }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="wrap">
+    <a class="mark" href="../"><img src="../assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>
+  </div>
+</header>
+
+<main class="ad wrap">
+  <div>
+    <h1>Quản lý dự án</h1>
+    <p class="sub">Đăng game mới hoặc thay video, bản chơi thử. Mỗi game có một link riêng để gửi cho publisher, không hiện trên trang chủ.</p>
+  </div>
+
+  <!-- 1. Kết nối -->
+  <section class="panel" id="connectBox">
+    <h2>1. Kết nối GitHub</h2>
+    <div id="tokenForm">
+      <ol class="how">
+        <li>Mở <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener"><b>trang tạo token</b></a> (Fine-grained token).</li>
+        <li>Đặt tên tùy ý, <b>Expiration</b> chọn thời hạn (ví dụ 1 năm).</li>
+        <li><b>Repository access</b> → Only select repositories → chọn <b>portfolio</b>.</li>
+        <li><b>Permissions</b> → Repository permissions → <b>Contents: Read and write</b>.</li>
+        <li>Bấm Generate token, copy rồi dán vào ô dưới. Token chỉ lưu trên trình duyệt này.</li>
+      </ol>
+      <div class="row" style="margin-top: 12px;">
+        <input type="password" id="token" placeholder="github_pat_..." autocomplete="off" style="flex: 1; min-width: 220px;">
+        <button class="btn btn-primary" id="saveToken" type="button">Kết nối</button>
+      </div>
+    </div>
+    <div class="row" id="tokenOk" hidden>
+      <span class="status ok" id="whoami">Đã kết nối</span>
+      <button class="small-btn" type="button" id="forget">Đổi token</button>
+    </div>
+    <p class="status" id="connStatus" role="status"></p>
+  </section>
+
+  <!-- 2. Danh sách -->
+  <section class="panel" id="listBox" hidden>
+    <div class="row" style="justify-content: space-between;">
+      <h2>2. Dự án đã đăng</h2>
+      <button class="small-btn" type="button" id="newBtn">+ Dự án mới</button>
+    </div>
+    <div id="projList"><p class="status">Đang tải…</p></div>
+  </section>
+
+  <!-- 3. Form -->
+  <section class="panel" id="formBox" hidden>
+    <h2 id="formTitle">3. Dự án mới</h2>
+    <p class="status" id="formNote"></p>
+    <form id="form" autocomplete="off">
+      <div style="display: flex; flex-direction: column; gap: 16px;">
+        <fieldset id="infoSet">
+          <legend>Thông tin game (tiếng Anh, publisher sẽ đọc)</legend>
+          <div class="grid2">
+            <label>Tên game *<input type="text" id="f_name" required placeholder="Penguin Slide"></label>
+            <label>Thể loại<input type="text" id="f_genre" placeholder="Hybrid-casual puzzle"></label>
+          </div>
+          <label>Mô tả 1 câu *<small>Người chơi làm gì, điều gì xảy ra.</small><textarea id="f_oneLine" required placeholder="Tap a penguin to belly-slide it and knock every penguin in its path into the sea."></textarea></label>
+          <div class="grid2">
+            <label>Trạng thái
+              <select id="f_status">
+                <option value="pitching">Pitching to publishers</option>
+                <option value="dev">In development</option>
+                <option value="paused">Early prototype</option>
+              </select>
+            </label>
+            <label>Số màn trong bản chơi thử<input type="number" id="f_levels" min="0" placeholder="7"></label>
+          </div>
+          <details>
+            <summary>Cách chơi (không bắt buộc)</summary>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <label>Điểm khác biệt trong 1 câu<input type="text" id="f_diffTitle" placeholder="A blocked piece is not a dead end"></label>
+              <label>So với game cùng dòng<textarea id="f_diffText"></textarea></label>
+              <div class="grid2"><label>Bước 1<input type="text" id="f_s1t" placeholder="Tap"></label><label>Mô tả<input type="text" id="f_s1d"></label></div>
+              <div class="grid2"><label>Bước 2<input type="text" id="f_s2t"></label><label>Mô tả<input type="text" id="f_s2d"></label></div>
+              <div class="grid2"><label>Bước 3<input type="text" id="f_s3t"></label><label>Mô tả<input type="text" id="f_s3d"></label></div>
+            </div>
+          </details>
+          <details>
+            <summary>Pitch (không bắt buộc)</summary>
+            <div style="display: flex; flex-direction: column; gap: 14px;">
+              <label>Market<textarea id="f_market"></textarea></label>
+              <label>Hook<textarea id="f_hook"></textarea></label>
+              <label>Ad creative<textarea id="f_ad"></textarea></label>
+              <label>Monetization<textarea id="f_monet"></textarea></label>
+              <label>Status<textarea id="f_statusFact"></textarea></label>
+            </div>
+          </details>
+        </fieldset>
+
+        <fieldset>
+          <legend>Video gameplay</legend>
+          <label>File video .mp4 <small id="videoHint">Quay dọc 9:16. Ảnh bìa tự lấy từ video.</small><input type="file" id="f_video" accept="video/mp4"></label>
+        </fieldset>
+
+        <fieldset>
+          <legend>Bản chơi thử</legend>
+          <label>Chọn cả thư mục build <small>Thư mục có file index.html (Unity WebGL build hoặc game HTML).</small><input type="file" id="f_playDir" webkitdirectory multiple></label>
+          <label>Hoặc chỉ 1 file .html<input type="file" id="f_playFile" accept=".html,text/html"></label>
+          <p class="tip"><b>Unity WebGL:</b> Player Settings → Publishing Settings → <b>Compression Format: Disabled</b> (hoặc bật <b>Decompression Fallback</b>). GitHub Pages không chạy được bản nén Brotli/Gzip mặc định.</p>
+          <p class="status" id="playInfo"></p>
+        </fieldset>
+
+        <label id="regenRow" class="row" style="flex-direction: row; gap: 8px;" hidden><input type="checkbox" id="f_regen"> Tạo lại trang giới thiệu từ thông tin ở trên (trang này được làm thủ công trước đây; bỏ chọn thì chỉ thay video / bản chơi)</label>
+
+        <div class="row">
+          <button class="btn btn-primary" type="submit" id="submitBtn">Đăng lên portfolio</button>
+          <button class="small-btn" type="button" id="cancelBtn">Hủy</button>
+        </div>
+        <div id="progress" hidden>
+          <div class="bar"><i id="barFill"></i></div>
+          <p class="status" id="progText" role="status" style="margin-top: 6px;"></p>
+        </div>
+        <div class="result" id="result" hidden>
+          <b>Đã đăng xong. GitHub cần khoảng 1–2 phút để cập nhật trang.</b>
+          <a id="resultLink" href="#" target="_blank" rel="noopener"></a>
+          <div class="row"><button class="small-btn" type="button" id="copyResult">Copy link</button></div>
+        </div>
+      </div>
+    </form>
+  </section>
+</main>
+
+<script>
+(function () {
+  'use strict';
+  var OWNER = 'vunguyenbg', REPO = 'portfolio', BRANCH = 'main';
+  var SITE = 'https://vunguyenbg.github.io/portfolio/';
+  var API = 'https://api.github.com/repos/' + OWNER + '/' + REPO;
+  var $ = function (id) { return document.getElementById(id); };
+  var token = '';
+  try { token = localStorage.getItem('pf-admin-token') || ''; } catch (e) {}
+  var editing = null; // { slug, data, legacy }
+
+  // ---------- GitHub API ----------
+  function api(path, opts) {
+    opts = opts || {};
+    var headers = { 'Authorization': 'Bearer ' + token, 'Accept': 'application/vnd.github+json' };
+    if (opts.body) headers['Content-Type'] = 'application/json';
+    return fetch(path.indexOf('http') === 0 ? path : API + path, {
+      method: opts.method || 'GET', headers: headers, body: opts.body ? JSON.stringify(opts.body) : undefined, cache: 'no-store'
+    }).then(function (r) {
+      if (r.status === 404 && opts.allow404) return null;
+      if (!r.ok) return r.text().then(function (t) {
+        var msg = t; try { msg = JSON.parse(t).message; } catch (e) {}
+        throw new Error(r.status + ': ' + msg);
+      });
+      return r.status === 204 ? null : r.json();
+    });
+  }
+  function b64ToText(b64) {
+    var bin = atob(b64.replace(/\n/g, ''));
+    var bytes = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+    return new TextDecoder().decode(bytes);
+  }
+  function blobToB64(blob) {
+    return new Promise(function (res, rej) {
+      var fr = new FileReader();
+      fr.onload = function () { var s = String(fr.result); res(s.slice(s.indexOf(',') + 1)); };
+      fr.onerror = function () { rej(fr.error); };
+      fr.readAsDataURL(blob);
+    });
+  }
+
+  // Commit many files (and deletions) in one go
+  function commitFiles(files, deletes, message, onProgress) {
+    var refSha, baseTree, entries = [];
+    return api('/git/ref/heads/' + BRANCH).then(function (ref) {
+      refSha = ref.object.sha;
+      return api('/git/commits/' + refSha);
+    }).then(function (c) {
+      baseTree = c.tree.sha;
+      var done = 0, total = files.reduce(function (s, f) { return s + f.blob.size; }, 0) || 1, sent = 0;
+      var queue = files.slice();
+      function worker() {
+        var f = queue.shift();
+        if (!f) return Promise.resolve();
+        return blobToB64(f.blob).then(function (b64) {
+          return api('/git/blobs', { method: 'POST', body: { content: b64, encoding: 'base64' } });
+        }).then(function (b) {
+          entries.push({ path: f.path, mode: '100644', type: 'blob', sha: b.sha });
+          done++; sent += f.blob.size;
+          onProgress(sent / total, 'Đang tải lên ' + done + '/' + files.length + ' file');
+          return worker();
+        });
+      }
+      return Promise.all([worker(), worker(), worker()]);
+    }).then(function () {
+      var written = {};
+      entries.forEach(function (e) { written[e.path] = 1; });
+      deletes.forEach(function (p) { if (!written[p]) entries.push({ path: p, mode: '100644', type: 'blob', sha: null }); });
+      onProgress(1, 'Đang lưu…');
+      return api('/git/trees', { method: 'POST', body: { base_tree: baseTree, tree: entries } });
+    }).then(function (tree) {
+      return api('/git/commits', { method: 'POST', body: { message: message, tree: tree.sha, parents: [refSha] } });
+    }).then(function (commit) {
+      return api('/git/refs/heads/' + BRANCH, { method: 'PATCH', body: { sha: commit.sha } });
+    });
+  }
+  function listTree() {
+    return api('/git/trees/' + BRANCH + '?recursive=1').then(function (t) { return t.tree.filter(function (e) { return e.type === 'blob'; }).map(function (e) { return e.path; }); });
+  }
+
+  // ---------- Connect ----------
+  function connect() {
+    if (!token) { $('tokenForm').hidden = false; $('tokenOk').hidden = true; return; }
+    $('connStatus').className = 'status'; $('connStatus').textContent = 'Đang kiểm tra token…';
+    api('').then(function (repo) {
+      if (!repo.permissions || !repo.permissions.push) throw new Error('Token chưa có quyền ghi (Contents: Read and write).');
+      $('connStatus').textContent = '';
+      $('tokenForm').hidden = true; $('tokenOk').hidden = false;
+      $('whoami').textContent = 'Đã kết nối repo ' + repo.full_name;
+      $('listBox').hidden = false;
+      loadProjects();
+    }).catch(function (e) {
+      $('tokenForm').hidden = false; $('tokenOk').hidden = true;
+      $('connStatus').className = 'status err';
+      $('connStatus').textContent = 'Không kết nối được: ' + e.message;
+    });
+  }
+  $('saveToken').addEventListener('click', function () {
+    token = $('token').value.trim();
+    try { localStorage.setItem('pf-admin-token', token); } catch (e) {}
+    connect();
+  });
+  $('forget').addEventListener('click', function () {
+    token = ''; try { localStorage.removeItem('pf-admin-token'); } catch (e) {}
+    $('token').value = ''; $('listBox').hidden = true; $('formBox').hidden = true;
+    connect();
+  });
+
+  // ---------- Project list ----------
+  var projects = [];
+  function loadProjects() {
+    $('projList').innerHTML = '<p class="status">Đang tải…</p>';
+    api('/contents/p?ref=' + BRANCH, { allow404: true }).then(function (items) {
+      var dirs = (items || []).filter(function (i) { return i.type === 'dir'; });
+      return Promise.all(dirs.map(function (d) {
+        return api('/contents/p/' + d.name + '/project.json?ref=' + BRANCH, { allow404: true }).then(function (f) {
+          var data = null;
+          if (f && f.content) { try { data = JSON.parse(b64ToText(f.content)); } catch (e) {} }
+          return { slug: d.name, data: data };
+        });
+      }));
+    }).then(function (list) {
+      projects = list;
+      if (!list.length) { $('projList').innerHTML = '<p class="status">Chưa có dự án nào.</p>'; return; }
+      $('projList').innerHTML = '';
+      list.forEach(function (p) {
+        var url = SITE + 'p/' + p.slug + '/';
+        var row = document.createElement('div');
+        row.className = 'proj';
+        var name = p.data && p.data.name ? p.data.name : p.slug.replace(/-[a-z0-9]{6}$/, '').replace(/-/g, ' ');
+        row.innerHTML = '<div><b></b><code></code></div><div class="row"><a class="small-btn" target="_blank" rel="noopener">Mở</a><button class="small-btn" type="button" data-copy>Copy link</button><button class="small-btn" type="button" data-edit>Sửa</button></div>';
+        row.querySelector('b').textContent = name;
+        row.querySelector('code').textContent = url;
+        row.querySelector('a').href = url;
+        row.querySelector('[data-copy]').addEventListener('click', function (e) { copy(url, e.target); });
+        row.querySelector('[data-edit]').addEventListener('click', function () { openForm(p); });
+        $('projList').appendChild(row);
+      });
+    }).catch(function (e) {
+      $('projList').innerHTML = '';
+      var p = document.createElement('p'); p.className = 'status err'; p.textContent = 'Lỗi tải danh sách: ' + e.message;
+      $('projList').appendChild(p);
+    });
+  }
+  function copy(text, btn) {
+    var done = function () { var t = btn.textContent; btn.textContent = 'Đã copy'; setTimeout(function () { btn.textContent = t; }, 1400); };
+    if (navigator.clipboard) navigator.clipboard.writeText(text).then(done, function () { prompt('Copy link:', text); });
+    else prompt('Copy link:', text);
+  }
+
+  // ---------- Form ----------
+  var FIELDS = ['name', 'genre', 'oneLine', 'status', 'levels', 'diffTitle', 'diffText', 's1t', 's1d', 's2t', 's2d', 's3t', 's3d', 'market', 'hook', 'ad', 'monet', 'statusFact'];
+  function openForm(p) {
+    editing = p || null;
+    $('form').reset();
+    $('result').hidden = true; $('progress').hidden = true;
+    $('playInfo').textContent = '';
+    var legacy = !!(p && !p.data);
+    $('formTitle').textContent = p ? '3. Sửa: ' + (p.data ? p.data.name : p.slug) : '3. Dự án mới';
+    $('formNote').textContent = p ? 'Để trống video hoặc bản chơi thử nếu không muốn thay.' : 'Cần ít nhất video hoặc bản chơi thử.';
+    $('regenRow').hidden = !legacy;
+    $('f_regen').checked = false;
+    setInfoRequired(!legacy);
+    if (p && p.data) FIELDS.forEach(function (k) { var el = $('f_' + k); if (el && p.data[k] !== undefined) el.value = p.data[k]; });
+    $('formBox').hidden = false;
+    $('formBox').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+  function setInfoRequired(on) {
+    $('infoSet').hidden = !on;
+    $('f_name').required = on; $('f_oneLine').required = on;
+  }
+  $('f_regen').addEventListener('change', function () { setInfoRequired(this.checked); });
+  $('newBtn').addEventListener('click', function () { openForm(null); });
+  $('cancelBtn').addEventListener('click', function () { $('formBox').hidden = true; editing = null; });
+
+  function playFiles() {
+    var dir = Array.prototype.slice.call($('f_playDir').files || []);
+    var single = $('f_playFile').files && $('f_playFile').files[0];
+    if (dir.length) {
+      var paths = dir.map(function (f) { return (f.webkitRelativePath || f.name).split('/').slice(1).join('/'); });
+      var idx = paths.indexOf('index.html');
+      var prefix = '';
+      if (idx < 0) {
+        var nested = paths.filter(function (p) { return /(^|\/)index\.html$/.test(p); }).sort(function (a, b) { return a.length - b.length; })[0];
+        if (!nested) throw new Error('Thư mục bản chơi thử không có file index.html.');
+        prefix = nested.slice(0, nested.length - 'index.html'.length);
+      }
+      var out = [];
+      dir.forEach(function (f, i) {
+        var p = paths[i];
+        if (prefix && p.indexOf(prefix) !== 0) return;
+        p = p.slice(prefix.length);
+        if (!p || /(^|\/)\.(DS_Store|git)/.test(p) || /Thumbs\.db$/.test(p)) return;
+        out.push({ path: 'play/' + p, blob: f });
+      });
+      return out;
+    }
+    if (single) return [{ path: 'play/index.html', blob: single }];
+    return null;
+  }
+  function updatePlayInfo() {
+    try {
+      var f = playFiles();
+      if (!f) { $('playInfo').textContent = ''; return; }
+      var mb = f.reduce(function (s, x) { return s + x.blob.size; }, 0) / 1048576;
+      $('playInfo').className = 'status ok';
+      $('playInfo').textContent = f.length + ' file, ' + (mb < 1 ? Math.max(1, Math.round(mb * 1024)) + ' KB' : mb.toFixed(1) + ' MB');
+      var big = f.filter(function (x) { return x.blob.size > 95 * 1048576; })[0];
+      if (big) { $('playInfo').className = 'status err'; $('playInfo').textContent = 'File ' + big.path + ' quá 95 MB, GitHub không nhận.'; }
+    } catch (e) { $('playInfo').className = 'status err'; $('playInfo').textContent = e.message; }
+  }
+  $('f_playDir').addEventListener('change', function () { $('f_playFile').value = ''; updatePlayInfo(); });
+  $('f_playFile').addEventListener('change', function () { $('f_playDir').value = ''; updatePlayInfo(); });
+
+  // ---------- Poster + share image from the video ----------
+  function grabFrames(file) {
+    return new Promise(function (res, rej) {
+      var v = document.createElement('video');
+      v.muted = true; v.playsInline = true; v.preload = 'auto';
+      var url = URL.createObjectURL(file);
+      v.src = url;
+      v.onerror = function () { rej(new Error('Không đọc được video. Hãy dùng file .mp4 (H.264).')); };
+      v.onloadedmetadata = function () { v.currentTime = Math.min(1.2, (v.duration || 2) / 3); };
+      v.onseeked = function () {
+        var w = v.videoWidth, h = v.videoHeight;
+        var pw = Math.min(720, w), ph = Math.round(h * pw / w);
+        var pc = document.createElement('canvas'); pc.width = pw; pc.height = ph;
+        pc.getContext('2d').drawImage(v, 0, 0, pw, ph);
+        var oc = document.createElement('canvas'); oc.width = 1200; oc.height = 630;
+        var g = oc.getContext('2d');
+        g.fillStyle = '#0E1530'; g.fillRect(0, 0, 1200, 630);
+        var sh = 630, sw = Math.round(w * sh / h);
+        if (sw > 600) { sw = 600; sh = Math.round(h * sw / w); }
+        g.drawImage(v, 1200 - sw - 60, (630 - sh) / 2, sw, sh);
+        var name = ($('f_name').value || (editing && editing.data && editing.data.name) || '').trim();
+        g.fillStyle = '#FFC21A'; g.font = '600 24px "JetBrains Mono", monospace';
+        g.fillText('GAME CONCEPT', 60, 250);
+        g.fillStyle = '#F4F6FF'; g.font = '800 64px "Bricolage Grotesque", sans-serif';
+        wrapText(g, name, 60, 330, 1200 - sw - 160, 70);
+        g.fillStyle = '#AAB4D8'; g.font = '500 26px "Figtree", sans-serif';
+        g.fillText('Vu Van Nguyen · Unity developer', 60, 560);
+        Promise.all([toBlob(pc), toBlob(oc)]).then(function (b) { URL.revokeObjectURL(url); res({ poster: b[0], og: b[1] }); }, rej);
+      };
+    });
+  }
+  function toBlob(c) { return new Promise(function (r) { c.toBlob(r, 'image/jpeg', 0.86); }); }
+  function wrapText(g, text, x, y, maxW, lh) {
+    var words = text.split(/\s+/), line = '';
+    words.forEach(function (w) {
+      var t = line ? line + ' ' + w : w;
+      if (g.measureText(t).width > maxW && line) { g.fillText(line, x, y); y += lh; line = w; } else line = t;
+    });
+    if (line) g.fillText(line, x, y);
+  }
+
+  // ---------- Pitch page ----------
+  function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) { return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]; }); }
+  var STATUS = { pitching: ['pitching', 'Pitching to publishers'], dev: ['dev', 'In development'], paused: ['paused', 'Early prototype'] };
+  function buildPage(d, slug) {
+    var st = STATUS[d.status] || STATUS.pitching;
+    var url = SITE + 'p/' + slug + '/';
+    var steps = [[d.s1t, d.s1d], [d.s2t, d.s2d], [d.s3t, d.s3d]].filter(function (s) { return s[0] || s[1]; });
+    var facts = [['Market', d.market], ['Hook', d.hook], ['Ad creative', d.ad], ['Monetization', d.monet], ['Status', d.statusFact]].filter(function (f) { return f[1]; });
+    var hasHow = steps.length || d.diffTitle || d.diffText;
+    var play = d.hasPlay, video = d.hasVideo;
+    var mailSubj = encodeURIComponent(d.name);
+    var levels = parseInt(d.levels, 10);
+    var chips = '<span class="chip ' + st[0] + '">' + st[1] + '</span>' +
+      (play ? '<span class="chip live">Playable prototype' + (levels > 0 ? ' · ' + levels + ' levels' : '') + '</span>' : '') +
+      (d.genre ? '<span class="chip">' + esc(d.genre) + '</span>' : '');
+    var h = [];
+    h.push('<!doctype html>\n<html lang="en">\n<head>\n<meta charset="utf-8">\n<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">');
+    h.push('<title>' + esc(d.name) + ' · Vu Van Nguyen</title>');
+    h.push('<meta name="description" content="' + esc(d.name) + ': ' + esc(d.oneLine) + '">');
+    h.push('<meta name="robots" content="noindex, nofollow">\n<meta name="theme-color" content="#0E1530">');
+    h.push('<meta property="og:type" content="website">\n<meta property="og:title" content="' + esc(d.name) + '">\n<meta property="og:description" content="' + esc(d.oneLine) + '">');
+    h.push('<meta property="og:url" content="' + url + '">');
+    if (video) h.push('<meta property="og:image" content="' + url + 'media/og.jpg">\n<meta name="twitter:card" content="summary_large_image">');
+    h.push('<link rel="preconnect" href="https://fonts.googleapis.com">\n<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>');
+    h.push('<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap">');
+    h.push('<link rel="stylesheet" href="../../assets/site.css">\n</head>\n<body class="has-actionbar">');
+    h.push('<header class="top">\n  <div class="wrap">\n    <a class="mark" href="../../"><img src="../../assets/avatar.jpg" alt="" width="30" height="30">Vu Van Nguyen</a>\n    <nav class="nav" aria-label="Sections">' +
+      (hasHow ? '\n      <a href="#how">How it plays</a>' : '') + (facts.length ? '\n      <a href="#pitch">Pitch</a>' : '') + '\n      <a href="#contact">Contact</a>\n    </nav>\n  </div>\n</header>');
+    h.push('<main>\n  <div class="cp-hero">\n    <div class="wrap">\n      <div class="cp-head">\n        <a class="back" href="../../">← Vu Van Nguyen · Portfolio</a>');
+    h.push('        <p class="eyebrow" style="margin-top: 18px;">Game concept' + (d.genre ? ' · ' + esc(d.genre) : '') + '</p>\n        <h1>' + esc(d.name) + '</h1>\n        <p class="lead">' + esc(d.oneLine) + '</p>\n      </div>');
+    h.push('      <div class="cp-meta">\n        <div class="chips">' + chips + '</div>\n        <div class="cta">' +
+      (play ? '\n          <a class="btn btn-primary" href="play/"><svg aria-hidden="true" width="16" height="16" viewBox="0 0 16 16"><path d="M4 2.5 L13 8 L4 13.5 Z" fill="currentColor"></path></svg> Play the prototype</a>' : '') +
+      (video ? '\n          <a class="' + (play ? 'btn btn-ghost' : 'btn btn-primary') + '" href="media/gameplay.mp4" download>Download gameplay video</a>' : '') +
+      '\n        </div>\n        <p class="mail">Contact: <a href="mailto:vnkgame@gmail.com?subject=' + mailSubj + '">vnkgame@gmail.com</a></p>\n      </div>');
+    if (video) h.push('      <div class="phone">\n        <video poster="media/poster.jpg" autoplay muted loop playsinline preload="metadata" aria-label="' + esc(d.name) + ' gameplay">\n          <source src="media/gameplay.mp4" type="video/mp4">\n        </video>\n      </div>');
+    h.push('    </div>\n  </div>');
+    if (hasHow) {
+      h.push('  <section id="how">\n    <div class="wrap">\n      <div class="sec-head">\n        <div>\n          <p class="eyebrow">How it plays</p>\n          <h2>' + esc(d.diffTitle || 'How it plays') + '</h2>\n        </div>' +
+        (d.diffText ? '\n        <p>' + esc(d.diffText) + '</p>' : '') + '\n      </div>');
+      if (steps.length) h.push('      <div class="panel">\n        <ol class="steps">\n' + steps.map(function (s) { return '          <li><div><b>' + esc(s[0]) + '</b><span>' + esc(s[1]) + '</span></div></li>'; }).join('\n') + '\n        </ol>\n      </div>');
+      h.push('    </div>\n  </section>');
+    }
+    if (facts.length) {
+      h.push('  <section id="pitch">\n    <div class="wrap">\n      <div class="sec-head">\n        <div>\n          <p class="eyebrow">Pitch</p>\n          <h2>Why ' + esc(d.name) + '</h2>\n        </div>\n      </div>\n      <div class="panel">\n        <dl class="facts">\n' +
+        facts.map(function (f) { return '          <div><dt>' + f[0] + '</dt><dd>' + esc(f[1]) + '</dd></div>'; }).join('\n') + '\n        </dl>\n      </div>\n    </div>\n  </section>');
+    }
+    h.push('  <section id="contact">\n    <div class="wrap">\n      <div class="contact">\n        <div class="bio">\n          <img src="../../assets/avatar.jpg" alt="Vu Van Nguyen" width="96" height="96">\n          <div>\n            <p class="eyebrow">Built by</p>\n            <h2 style="font-size: clamp(26px, 3.2vw, 34px);">Vu Van Nguyen</h2>\n            <p>Unity developer from Hanoi with 8+ years shipping mobile games, including the puzzle game Bus Sort: Color Parking Jam.</p>\n            <div class="stats-inline"><span><b>9</b>games worked on</span><span><b>150M+</b>Google Play installs</span></div>\n          </div>\n        </div>');
+    h.push('        <div class="links">\n          <a href="mailto:vnkgame@gmail.com"><span>vnkgame@gmail.com</span><small>Email</small></a>\n          <a href="../../"><span>Full portfolio</span><small>Shipped games ↗</small></a>\n          <a href="https://www.linkedin.com/in/nguyenvv/" target="_blank" rel="noopener"><span>linkedin.com/in/nguyenvv</span><small>LinkedIn ↗</small></a>\n          <a href="https://drive.google.com/file/d/1AQnjB_eqO_epPdv0qfYO_CVVMXGxA_NP/view?usp=drive_link" target="_blank" rel="noopener"><span>Curriculum vitae</span><small>PDF ↗</small></a>\n        </div>\n      </div>\n    </div>\n  </section>\n</main>');
+    h.push('<nav class="actionbar" aria-label="Quick actions">' + (play ? '\n  <a class="btn btn-primary" href="play/">Play prototype</a>' : '') + '\n  <a class="btn btn-ghost" href="mailto:vnkgame@gmail.com?subject=' + mailSubj + '">Email me</a>\n</nav>');
+    h.push('<footer>\n  <div class="wrap">© ' + new Date().getFullYear() + ' Vu Van Nguyen · ' + esc(d.name) + ' is an original concept.</div>\n</footer>\n</body>\n</html>\n');
+    return h.join('\n');
+  }
+
+  function slugify(s) {
+    return s.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/[đĐ]/g, 'd').toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 30).replace(/-+$/, '') || 'game';
+  }
+  function randCode() {
+    var a = 'abcdefghijkmnpqrstuvwxyz23456789', b = new Uint32Array(6), out = '';
+    crypto.getRandomValues(b);
+    for (var i = 0; i < 6; i++) out += a[b[i] % a.length];
+    return out;
+  }
+  function textBlob(s, type) { return new Blob([s], { type: type || 'text/plain' }); }
+
+  // ---------- Submit ----------
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var btn = $('submitBtn');
+    var video = $('f_video').files && $('f_video').files[0];
+    var play;
+    try { play = playFiles(); } catch (err) { alert(err.message); return; }
+    var legacy = !!(editing && !editing.data);
+    var regen = !legacy || $('f_regen').checked;
+    if (!editing && !video && !play) { alert('Hãy chọn video hoặc bản chơi thử.'); return; }
+    if (editing && !video && !play && !regen) { alert('Chưa có gì để thay.'); return; }
+    if (video && video.size > 95 * 1048576) { alert('Video quá 95 MB, GitHub không nhận. Hãy nén nhỏ lại.'); return; }
+
+    var slug = editing ? editing.slug : slugify($('f_name').value) + '-' + randCode();
+    var base = 'p/' + slug + '/';
+    var d = {};
+    if (regen) {
+      FIELDS.forEach(function (k) { d[k] = $('f_' + k).value.trim(); });
+      d.created = (editing && editing.data && editing.data.created) || new Date().toISOString().slice(0, 10);
+      d.updated = new Date().toISOString().slice(0, 10);
+    }
+    var files = [], deletes = [];
+    btn.disabled = true;
+    $('result').hidden = true; $('progress').hidden = false;
+    var setP = function (f, t) { $('barFill').style.width = Math.round(f * 100) + '%'; $('progText').textContent = t; };
+    $('progText').className = 'status';
+    setP(0, 'Đang chuẩn bị…');
+
+    var existing = [];
+    (editing ? listTree() : Promise.resolve([])).then(function (all) {
+      existing = all.filter(function (p) { return p.indexOf(base) === 0; });
+      if (video) {
+        setP(0, 'Đang lấy ảnh bìa từ video…');
+        return grabFrames(video).then(function (img) {
+          files.push({ path: base + 'media/gameplay.mp4', blob: video });
+          files.push({ path: base + 'media/poster.jpg', blob: img.poster });
+          files.push({ path: base + 'media/og.jpg', blob: img.og });
+          if (existing.indexOf(base + 'media/gameplay.webm') >= 0) deletes.push(base + 'media/gameplay.webm');
+        });
+      }
+    }).then(function () {
+      if (play) {
+        play.forEach(function (f) { files.push({ path: base + f.path, blob: f.blob }); });
+        existing.forEach(function (p) { if (p.indexOf(base + 'play/') === 0) deletes.push(p); });
+      }
+      if (regen) {
+        var has = function (p) { return existing.indexOf(base + p) >= 0; };
+        d.hasVideo = !!video || has('media/gameplay.mp4');
+        d.hasPlay = !!play || has('play/index.html');
+        files.push({ path: base + 'index.html', blob: textBlob(buildPage(d, slug), 'text/html') });
+        files.push({ path: base + 'project.json', blob: textBlob(JSON.stringify(d, null, 2), 'application/json') });
+      }
+      var name = d.name || (editing && editing.data && editing.data.name) || slug;
+      return commitFiles(files, deletes, (editing ? 'Update ' : 'Add ') + name, setP);
+    }).then(function () {
+      var url = SITE + base;
+      $('progress').hidden = true;
+      $('result').hidden = false;
+      $('resultLink').href = url; $('resultLink').textContent = url;
+      $('copyResult').onclick = function (ev) { copy(url, ev.target); };
+      editing = { slug: slug, data: regen ? d : (editing && editing.data) };
+      $('formTitle').textContent = '3. Sửa: ' + (d.name || slug);
+      loadProjects();
+    }).catch(function (err) {
+      $('progText').className = 'status err';
+      $('progText').textContent = 'Lỗi: ' + err.message;
+    }).then(function () { btn.disabled = false; });
+  });
+
+  connect();
+})();
+</script>
+</body>
+</html>
